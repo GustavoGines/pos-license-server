@@ -63,6 +63,12 @@ class LicensesTable
                     ->fontFamily('mono')
                     ->toggleable(),
 
+                TextColumn::make('addons')
+                    ->label('Addons')
+                    ->badge()
+                    ->searchable()
+                    ->toggleable(),
+
                 TextColumn::make('created_at')
                     ->label('Created')
                     ->dateTime('d/m/Y H:i')
