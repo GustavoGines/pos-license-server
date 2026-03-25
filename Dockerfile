@@ -1,6 +1,6 @@
 FROM php:8.3-apache
 
-# Install system dependencies
+# Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -16,57 +16,54 @@ RUN apt-get update && apt-get install -y \
     && apt-get install -y nodejs \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install PHP extensions
+# Instalar extensiones PHP
 RUN docker-php-ext-configure intl \
     && docker-php-ext-install pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd intl zip
 
-# Allow Composer to run as root securely
+# Permitir a Composer correr como root
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
-# Enable Apache mod_rewrite
+# Habilitar mod_rewrite de Apache
 RUN a2enmod rewrite
 
-# Update Apache DocumentRoot to point to Laravel's public directory
-ENV APACHE_DOCUMENT_ROOT /var/www/html/public
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
-RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+# Copiar la configuración limpia de Apache (apunta a /public de Laravel)
+COPY docker/apache/000-default.conf /etc/apache2/sites-available/000-default.conf
 
-# Set working directory
+# Directorio de trabajo
 WORKDIR /var/www/html
 
-# Install Composer
+# Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copy composer files first to leverage Docker cache
+# Copiar archivos de composer primero para aprovechar caché de Docker
 COPY composer.json composer.lock ./
 
-# Install Laravel dependencies
+# Instalar dependencias Laravel
 RUN composer install --no-dev --optimize-autoloader --no-scripts
 
-# Copy package files
+# Copiar archivos de Node
 COPY package.json package-lock.json* ./
 
-# Install Node dependencies
+# Instalar dependencias Node
 RUN npm install
 
-# Copy the rest of the application
+# Copiar el resto de la aplicación
 COPY . /var/www/html
 
-# Run composer dump-autoload a second time so it runs scripts and creates caches if needed
+# Re-correr composer dump-autoload con scripts
 RUN composer dump-autoload --optimize
 
-# Compilar assets frontend (Vite)
+# Compilar assets (Vite + Tailwind + Filament CSS)
 RUN npm run build
 
-# Set permissions for Laravel
+# Establecer permisos para Laravel
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache || true
 RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache || true
 
-# Copy entrypoint script
+# Copiar y dar permisos al script de entrada
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Expose port 80
 EXPOSE 80
 
 ENTRYPOINT ["docker-entrypoint.sh"]
