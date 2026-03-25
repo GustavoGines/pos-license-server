@@ -55,7 +55,10 @@ COPY . /var/www/html
 # Run composer dump-autoload a second time so it runs scripts and creates caches if needed
 RUN composer dump-autoload --optimize
 
-# Build frontend assets (Vite)
+# Correr filament:upgrade para publicar assets de Filament
+RUN php artisan filament:upgrade || true
+
+# Compilar assets frontend (Vite)
 RUN npm run build
 
 # Set permissions for Laravel

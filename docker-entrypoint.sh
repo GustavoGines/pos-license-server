@@ -14,10 +14,11 @@ if [ -d "/var/www/html/bootstrap/cache" ]; then
     chmod -R 775 /var/www/html/bootstrap/cache
 fi
 
-# Run database migrations first so the 'cache' table exists before clearing
-echo "Running database migrations..."
+# Correr migraciones primero para que la tabla cache exista antes de limpiarla
+echo "Corriendo migraciones de base de datos..."
 php artisan config:clear || true
 php artisan migrate --force
+php artisan db:seed --force
 
 # Clear caches and optimize
 echo "Clearing and caching configurations..."
