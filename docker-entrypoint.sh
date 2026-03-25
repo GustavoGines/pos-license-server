@@ -20,8 +20,12 @@ php artisan config:clear || true
 php artisan migrate --force
 php artisan db:seed --force
 
-# Clear caches and optimize
-echo "Clearing and caching configurations..."
+# Publicar assets de Filament (requiere APP_KEY disponible, por eso va aqui)
+php artisan filament:upgrade || true
+php artisan storage:link || true
+
+# Limpiar y cachear configuraciones
+echo "Cacheando configuraciones..."
 php artisan optimize:clear || true
 php artisan config:cache
 php artisan route:cache || true
