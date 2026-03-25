@@ -18,6 +18,7 @@ class License extends Model
         'is_active',
         'expiration_date',
         'allowed_addons',
+        'addons',
         'installation_id',   // UUID del dispositivo que activó la licencia
     ];
 
@@ -25,6 +26,7 @@ class License extends Model
         'is_active'       => 'boolean',
         'expiration_date' => 'date',
         'allowed_addons'  => 'array',
+        'addons'          => 'array',
     ];
 
     /**

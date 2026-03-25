@@ -68,11 +68,12 @@ class LicenseValidationController extends Controller
             ], 403);
         }
 
-        // 5. Todo válido → retornar 200 con el plan
+        // 5. Todo válido → retornar 200 con el plan y los addons vinculados
         return response()->json([
             'status'      => 'active',
             'plan'        => $license->plan_type,
             'client_name' => $license->client_name,
+            'addons'      => $license->addons ?? [],
         ], 200);
     }
 }

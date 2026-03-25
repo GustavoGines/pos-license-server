@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Licenses\Schemas;
 
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
@@ -18,14 +19,14 @@ class LicenseForm
                     ->label('Client Name')
                     ->required()
                     ->maxLength(255)
-                    ->columnSpan(2),
+                    ->columnSpan(['default' => 2]),
 
                 TextInput::make('api_key')
                     ->label('API Key')
                     ->disabled()
                     ->dehydrated(false)
                     ->helperText('Generated automatically on creation.')
-                    ->columnSpan(2),
+                    ->columnSpan(['default' => 2]),
 
                 Select::make('plan_type')
                     ->label('Plan')
@@ -46,6 +47,14 @@ class LicenseForm
                     ->disabled()
                     ->dehydrated(false)
                     ->helperText('Se vincula automáticamente cuando el cliente activa la licencia por primera vez.')
+                    ->columnSpanFull(),
+
+                TagsInput::make('addons')
+                    ->label('Módulos Adicionales (Addons)')
+                    ->placeholder('Ej: cuentas_corrientes')
+                    ->suggestions([
+                        'cuentas_corrientes',
+                    ])
                     ->columnSpanFull(),
 
                 Toggle::make('is_active')
