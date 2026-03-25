@@ -1,0 +1,13 @@
+/vendor
+/node_modules
+/public/build
+/.git
+/.env
+/.env.testing
+/storage/logs/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/public/storage
+docker-compose.yml
+render-build.sh
