@@ -63,8 +63,8 @@ class LicensesTable
                     ->fontFamily('mono')
                     ->toggleable(),
 
-                TextColumn::make('addons')
-                    ->label('Addons')
+                TextColumn::make('allowed_addons')
+                    ->label('Módulos')
                     ->badge()
                     ->searchable()
                     ->toggleable(),

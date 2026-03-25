@@ -49,8 +49,8 @@ class LicenseForm
                     ->helperText('Se vincula automáticamente cuando el cliente activa la licencia por primera vez.')
                     ->columnSpanFull(),
 
-                TagsInput::make('addons')
-                    ->label('Módulos Adicionales (Addons)')
+                TagsInput::make('allowed_addons')
+                    ->label('Módulos')
                     ->placeholder('Ej: cuentas_corrientes')
                     ->suggestions([
                         'cuentas_corrientes',
