@@ -41,6 +41,13 @@ class LicenseForm
                     ->label('Expiration Date')
                     ->nullable(),
 
+                TextInput::make('installation_id')
+                    ->label('Installation ID')
+                    ->disabled()
+                    ->dehydrated(false)
+                    ->helperText('Se vincula automáticamente cuando el cliente activa la licencia por primera vez.')
+                    ->columnSpanFull(),
+
                 Toggle::make('is_active')
                     ->label('Active')
                     ->default(true)

@@ -54,7 +54,14 @@ class LicensesTable
                     ->label('Expires')
                     ->date('d/m/Y')
                     ->sortable()
-                    ->color(fn (string $state, $record): ?string => $record->expiration_date?->isPast() ? 'danger' : null),
+                    ->color(fn ($state, $record): ?string => $record->expiration_date?->isPast() ? 'danger' : null),
+
+                TextColumn::make('installation_id')
+                    ->label('Installation ID')
+                    ->searchable()
+                    ->limit(15)
+                    ->fontFamily('mono')
+                    ->toggleable(),
 
                 TextColumn::make('created_at')
                     ->label('Created')
