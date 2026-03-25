@@ -18,16 +18,17 @@ class License extends Model
         'is_active',
         'expiration_date',
         'allowed_addons',
+        'installation_id',   // UUID del dispositivo que activó la licencia
     ];
 
     protected $casts = [
-        'is_active' => 'boolean',
+        'is_active'       => 'boolean',
         'expiration_date' => 'date',
-        'allowed_addons' => 'array',
+        'allowed_addons'  => 'array',
     ];
 
     /**
-     * Automatically generate UUID and API Key on creation if empty
+     * Genera UUID y API Key automáticamente al crear una licencia nueva.
      */
     protected static function boot()
     {
