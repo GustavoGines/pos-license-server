@@ -31,7 +31,7 @@ class LicensesTable
                     ->searchable()
                     ->limit(30)
                     ->fontFamily('mono')
-                    ->tooltip(fn ($record) => $record->api_key),
+                    ->tooltip(fn (string $state): string => $state),
 
                 TextColumn::make('plan_type')
                     ->label('Plan')
@@ -54,7 +54,7 @@ class LicensesTable
                     ->label('Expires')
                     ->date('d/m/Y')
                     ->sortable()
-                    ->color(fn ($record) => $record->expiration_date?->isPast() ? 'danger' : null),
+                    ->color(fn (string $state, $record): ?string => $record->expiration_date?->isPast() ? 'danger' : null),
 
                 TextColumn::make('created_at')
                     ->label('Created')
