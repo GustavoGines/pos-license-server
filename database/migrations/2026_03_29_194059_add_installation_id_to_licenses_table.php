@@ -11,9 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('licenses', function (Blueprint $table) {
-            $table->string('installation_id')->nullable()->after('expiration_date');
-        });
+        try {
+            if (!Schema::hasColumn('licenses', 'installation_id')) {
+                Schema::table('licenses', function (Blueprint $table) {
+                    $table->string('installation_id')->nullable()->after('expiration_date');
+                });
+            }
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Postgres error code 42701 = Duplicate column
+            if ($e->getCode() !== '42701') {
+                throw $e;
+            }
+        }
     }
 
     /**
@@ -21,8 +30,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('licenses', function (Blueprint $table) {
-            $table->dropColumn('installation_id');
-        });
+        if (Schema::hasColumn('licenses', 'installation_id')) {
+            Schema::table('licenses', function (Blueprint $table) {
+                $table->dropColumn('installation_id');
+            });
+        }
     }
 };
