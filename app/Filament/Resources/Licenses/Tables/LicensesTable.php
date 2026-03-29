@@ -33,7 +33,7 @@ class LicensesTable
                     ->fontFamily('mono')
                     ->tooltip(fn (string $state): string => $state),
 
-                TextColumn::make('plan_type')
+                TextColumn::make('plan')
                     ->label('Plan')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
@@ -43,6 +43,17 @@ class LicensesTable
                         default      => 'gray',
                     })
                     ->formatStateUsing(fn (string $state) => ucfirst($state))
+                    ->sortable(),
+
+                TextColumn::make('plan_type')
+                    ->label('Tipo')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'saas'     => 'primary',
+                        'lifetime' => 'success',
+                        default    => 'gray',
+                    })
+                    ->formatStateUsing(fn (string $state) => strtoupper($state))
                     ->sortable(),
 
                 IconColumn::make('is_active')
@@ -76,12 +87,19 @@ class LicensesTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make('plan_type')
-                    ->label('Plan')
+                SelectFilter::make('plan')
+                    ->label('Nivel')
                     ->options([
                         'basic'      => 'Basic',
                         'pro'        => 'Pro',
                         'enterprise' => 'Enterprise',
+                    ]),
+
+                SelectFilter::make('plan_type')
+                    ->label('Tipo (Facturación)')
+                    ->options([
+                        'saas'     => 'SaaS',
+                        'lifetime' => 'Lifetime',
                     ]),
 
                 TernaryFilter::make('is_active')

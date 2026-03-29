@@ -28,8 +28,8 @@ class LicenseForm
                     ->helperText('Generated automatically on creation.')
                     ->columnSpan(['default' => 2]),
 
-                Select::make('plan_type')
-                    ->label('Plan')
+                Select::make('plan')
+                    ->label('Nivel de Acceso')
                     ->options([
                         'basic'      => 'Basic',
                         'pro'        => 'Pro',
@@ -38,8 +38,20 @@ class LicenseForm
                     ->required()
                     ->default('basic'),
 
+                Select::make('plan_type')
+                    ->label('Modelo de Facturación')
+                    ->options([
+                        'saas'     => 'SaaS (Suscripción)',
+                        'lifetime' => 'Lifetime (Pago Único)',
+                    ])
+                    ->required()
+                    ->default('saas')
+                    ->live(),
+
                 DatePicker::make('expiration_date')
                     ->label('Expiration Date')
+                    ->required(fn (callable $get) => $get('plan_type') === 'saas')
+                    ->hidden(fn (callable $get) => $get('plan_type') === 'lifetime')
                     ->nullable(),
 
                 TextInput::make('installation_id')

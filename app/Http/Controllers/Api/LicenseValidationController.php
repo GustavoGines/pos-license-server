@@ -71,7 +71,9 @@ class LicenseValidationController extends Controller
         // 5. Todo válido → retornar 200 con el plan y los addons habilitados
         return response()->json([
             'status'      => 'active',
-            'plan'        => $license->plan_type,
+            'plan'        => $license->plan,       // 'basic', 'pro', 'enterprise'
+            'plan_type'   => $license->plan_type,  // 'saas', 'lifetime'
+            'server_time' => now()->toIso8601String(),
             'client_name' => $license->client_name,
             'addons'      => $license->allowed_addons ?? [],
         ], 200);

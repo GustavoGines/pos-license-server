@@ -10,11 +10,19 @@ class License extends Model
 {
     use HasFactory;
 
+    const PLAN_BASIC = 'basic';
+    const PLAN_PRO = 'pro';
+    const PLAN_ENTERPRISE = 'enterprise';
+
+    const TYPE_SAAS = 'saas';
+    const TYPE_LIFETIME = 'lifetime';
+
     protected $fillable = [
         'uuid',
         'client_name',
         'api_key',
-        'plan_type',
+        'plan',              // Nivel de acceso (basic, pro, enterprise)
+        'plan_type',         // Modelo de facturación (saas, lifetime)
         'is_active',
         'expiration_date',
         'allowed_addons',
