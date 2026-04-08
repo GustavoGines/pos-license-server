@@ -17,9 +17,13 @@ class License extends Model
     const TYPE_SAAS = 'saas';
     const TYPE_LIFETIME = 'lifetime';
 
+    const BUSINESS_RETAIL = 'retail';
+    const BUSINESS_HARDWARE = 'hardware_store';
+
     protected $fillable = [
         'uuid',
         'client_name',
+        'business_type',
         'api_key',
         'plan',              // Nivel de acceso (basic, pro, enterprise)
         'plan_type',         // Modelo de facturación (saas, lifetime)

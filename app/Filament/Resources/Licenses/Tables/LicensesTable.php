@@ -26,6 +26,21 @@ class LicensesTable
                     ->sortable()
                     ->weight('bold'),
 
+                TextColumn::make('business_type')
+                    ->label('Rubro')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'retail'         => 'success',
+                        'hardware_store' => 'warning',
+                        default          => 'gray',
+                    })
+                    ->formatStateUsing(fn (string $state) => match ($state) {
+                        'retail'         => '🛒 Retail',
+                        'hardware_store' => '🔨 Ferretería',
+                        default          => ucfirst($state),
+                    })
+                    ->sortable(),
+
                 TextColumn::make('api_key')
                     ->label('API Key')
                     ->searchable()
