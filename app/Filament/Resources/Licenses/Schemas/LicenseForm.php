@@ -21,6 +21,15 @@ class LicenseForm
                     ->maxLength(255)
                     ->columnSpan(['default' => 2]),
 
+                Select::make('business_type')
+                    ->label('Tipo de Negocio')
+                    ->options([
+                        'retail'         => '🛒 Retail (Minimercado)',
+                        'hardware_store' => '🔨 Ferretería / Ind. Maderera',
+                    ])
+                    ->required()
+                    ->default('retail'),
+
                 TextInput::make('api_key')
                     ->label('API Key')
                     ->disabled()
