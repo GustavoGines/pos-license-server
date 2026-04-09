@@ -4,7 +4,6 @@ namespace App\Filament\Resources\Licenses\Schemas;
 
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
@@ -70,11 +69,15 @@ class LicenseForm
                     ->helperText('Se vincula automáticamente cuando el cliente activa la licencia por primera vez.')
                     ->columnSpanFull(),
 
-                TagsInput::make('allowed_addons')
-                    ->label('Módulos')
-                    ->placeholder('Ej: cuentas_corrientes')
-                    ->suggestions([
-                        'cuentas_corrientes',
+                Select::make('allowed_addons')
+                    ->label('Módulos Habilitados')
+                    ->multiple()
+                    ->options([
+                        'fast_pos'          => 'Caja Rápida',
+                        'z_reports'         => 'Reportes Z',
+                        'quotes'            => 'Presupuestos (PDF/WA)',
+                        'current_accounts'  => 'Cuentas Corrientes (Fiado)',
+                        'multiple_prices'   => 'Listas de Precios (Mayorista/Tarjeta)',
                     ])
                     ->columnSpanFull(),
 
