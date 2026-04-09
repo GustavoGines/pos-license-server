@@ -69,6 +69,17 @@ class LicenseValidationController extends Controller
         }
 
         // 5. Todo válido → retornar 200 con el plan y los addons habilitados
+        // Fallback de retrocompatibilidad: si la licencia no tiene módulos configurados,
+        // se asignan los módulos por defecto según el tipo de negocio.
+        $defaultAddonsByType = [
+            'hardware_store' => ['fast_pos', 'z_reports', 'quotes', 'current_accounts', 'multiple_prices'],
+            'retail'         => ['fast_pos', 'z_reports'],
+        ];
+
+        $addons = (!empty($license->allowed_addons))
+            ? $license->allowed_addons
+            : ($defaultAddonsByType[$license->business_type] ?? $defaultAddonsByType['retail']);
+
         return response()->json([
             'status'        => 'active',
             'plan'          => $license->plan,          // 'basic', 'pro', 'enterprise'
@@ -76,7 +87,7 @@ class LicenseValidationController extends Controller
             'server_time'   => now()->toIso8601String(),
             'client_name'   => $license->client_name,
             'business_type' => $license->business_type, // 'retail', 'hardware_store'
-            'addons'        => $license->allowed_addons ?? [],
+            'addons'        => $addons,
         ], 200);
     }
 }
