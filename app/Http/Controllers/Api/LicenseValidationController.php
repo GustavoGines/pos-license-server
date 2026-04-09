@@ -72,7 +72,7 @@ class LicenseValidationController extends Controller
         // Fallback de retrocompatibilidad: si la licencia no tiene módulos configurados,
         // se asignan los módulos por defecto según el tipo de negocio.
         $defaultAddonsByType = [
-            'hardware_store' => ['fast_pos', 'z_reports', 'quotes', 'current_accounts', 'multiple_prices'],
+            'hardware_store' => ['fast_pos', 'z_reports', 'quotes', 'current_accounts', 'multiple_prices', 'multi_caja'],
             'retail'         => ['fast_pos', 'z_reports'],
         ];
 

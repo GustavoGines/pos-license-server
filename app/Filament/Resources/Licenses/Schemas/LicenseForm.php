@@ -78,6 +78,7 @@ class LicenseForm
                         'quotes'            => 'Presupuestos (PDF/WA)',
                         'current_accounts'  => 'Cuentas Corrientes (Fiado)',
                         'multiple_prices'   => 'Listas de Precios (Mayorista/Tarjeta)',
+                        'multi_caja'        => 'Múltiples Cajas / Terminales',
                     ])
                     ->columnSpanFull(),
 
