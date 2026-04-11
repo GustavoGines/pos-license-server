@@ -47,8 +47,8 @@ class LicenseValidationController extends Controller
             ], 403);
         }
 
-        // 3. Verificar expiración
-        if ($license->expiration_date && $license->expiration_date->isPast()) {
+        // 3. Verificar expiración (solo para SaaS)
+        if ($license->plan_type === 'saas' && $license->expiration_date && $license->expiration_date->endOfDay()->isPast()) {
             return response()->json([
                 'status'  => 'expired',
                 'message' => 'La licencia ha expirado.',
@@ -56,7 +56,7 @@ class LicenseValidationController extends Controller
         }
 
         // 4. Protección anti-piratería por installation_id
-        if (is_null($license->installation_id)) {
+        if (empty($license->installation_id)) {
             // Primera activación: bindear el dispositivo a esta licencia
             $license->installation_id = $installationId;
             $license->save();
@@ -69,16 +69,27 @@ class LicenseValidationController extends Controller
         }
 
         // 5. Todo válido → retornar 200 con el plan y los addons habilitados
-        // Fallback de retrocompatibilidad: si la licencia no tiene módulos configurados,
-        // se asignan los módulos por defecto según el tipo de negocio.
-        $defaultAddonsByType = [
-            'hardware_store' => ['fast_pos', 'z_reports', 'quotes', 'current_accounts', 'multiple_prices', 'multi_caja'],
-            'retail'         => ['fast_pos', 'z_reports'],
-        ];
+        // Lógica de Negocio Cruce Plan + Rubro:
+        $businessAddons = [];
 
-        $addons = (!empty($license->allowed_addons))
-            ? $license->allowed_addons
-            : ($defaultAddonsByType[$license->business_type] ?? $defaultAddonsByType['retail']);
+        // 1. Módulos Base (Siempre disponibles para Retail y Ferretería)
+        array_push($businessAddons, 'fast_pos', 'z_reports');
+
+        // 2. Módulos por Plan (PRO / Enterprise para Retail y Ferretería)
+        if (in_array($license->plan, ['pro', 'enterprise'])) {
+            array_push($businessAddons, 'multi_caja', 'current_accounts');
+        }
+
+        // 3. Módulos Exclusivos por Vertical / Rubro
+        // La Ferretería SIEMPRE tiene presupuestos y múltiples listas, sin importar su plan (incluso Basic)
+        // Retail NUNCA los tiene, por más que sea Enterprise.
+        if ($license->business_type === 'hardware_store') {
+            array_push($businessAddons, 'quotes', 'multiple_prices');
+        }
+
+        // 4. Si el panel de administración inyectó algún addon extra manual, lo fusionamos
+        $adminAddons = is_array($license->allowed_addons) ? $license->allowed_addons : [];
+        $addons = array_values(array_unique(array_merge($businessAddons, $adminAddons)));
 
         return response()->json([
             'status'        => 'active',
