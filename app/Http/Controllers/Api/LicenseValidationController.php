@@ -99,9 +99,35 @@ class LicenseValidationController extends Controller
             'client_name'           => $license->client_name,
             'business_type'         => $license->business_type,
             'addons'                => $addons,
-            // Feature flags individuales (boolean) para gating rápido en el cliente POS
+            // Nuevo: Diccionario completo de Feature Flags
+            'features'              => $this->mapFeatures($addons),
+            // Feature flags individuales (leídos del mapa para consistencia)
             'has_advanced_reports'  => in_array('advanced_reports', $addons),
             'has_predictive_alerts' => in_array('predictive_alerts', $addons),
         ], 200);
+    }
+
+    /**
+     * Mapea el array de addons a un diccionario de booleanos estructurado.
+     */
+    private function mapFeatures(array $addons): array
+    {
+        $allFeatures = [
+            'fast_pos',
+            'z_reports',
+            'quotes',
+            'current_accounts',
+            'multiple_prices',
+            'multi_caja',
+            'advanced_reports',
+            'predictive_alerts',
+        ];
+
+        $map = [];
+        foreach ($allFeatures as $feature) {
+            $map[$feature] = in_array($feature, $addons);
+        }
+
+        return $map;
     }
 }
