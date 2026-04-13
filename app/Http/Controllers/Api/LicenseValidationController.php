@@ -48,7 +48,7 @@ class LicenseValidationController extends Controller
         }
 
         // 3. Verificar expiración (solo para SaaS)
-        if ($license->plan_type === 'saas' && $license->expiration_date && $license->expiration_date->endOfDay()->isPast()) {
+        if ($license->plan_type === 'saas' && $license->expiration_date && \Carbon\Carbon::parse($license->expiration_date)->endOfDay()->isPast()) {
             return response()->json([
                 'status'  => 'expired',
                 'message' => 'La licencia ha expirado.',
@@ -92,13 +92,16 @@ class LicenseValidationController extends Controller
         $addons = array_values(array_unique(array_merge($businessAddons, $adminAddons)));
 
         return response()->json([
-            'status'        => 'active',
-            'plan'          => $license->plan,          // 'basic', 'pro', 'enterprise'
-            'plan_type'     => $license->plan_type,     // 'saas', 'lifetime'
-            'server_time'   => now()->toIso8601String(),
-            'client_name'   => $license->client_name,
-            'business_type' => $license->business_type, // 'retail', 'hardware_store'
-            'addons'        => $addons,
+            'status'                => 'active',
+            'plan'                  => $license->plan,
+            'plan_type'             => $license->plan_type,
+            'server_time'           => now()->toIso8601String(),
+            'client_name'           => $license->client_name,
+            'business_type'         => $license->business_type,
+            'addons'                => $addons,
+            // Feature flags individuales (boolean) para gating rápido en el cliente POS
+            'has_advanced_reports'  => in_array('advanced_reports', $addons),
+            'has_predictive_alerts' => in_array('predictive_alerts', $addons),
         ], 200);
     }
 }
