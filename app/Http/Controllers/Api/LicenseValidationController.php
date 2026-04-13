@@ -98,8 +98,12 @@ class LicenseValidationController extends Controller
             'server_time'           => now()->toIso8601String(),
             'client_name'           => $license->client_name,
             'business_type'         => $license->business_type,
+            'addons'                => $addons,
             // Nuevo: Diccionario completo de Feature Flags
             'features'              => $this->mapFeatures($addons),
+            // Retrocompatibilidad: Flags individuales para clientes legacy
+            'has_advanced_reports'  => in_array('advanced_reports', $addons),
+            'has_predictive_alerts' => in_array('predictive_alerts', $addons),
         ], 200);
     }
 
