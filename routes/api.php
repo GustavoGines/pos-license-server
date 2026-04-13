@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\LicenseValidationController;
+use App\Http\Controllers\Api\ReleaseController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -10,3 +11,6 @@ Route::get('/user', function (Request $request) {
 
 // Endpoint nuevo con protección anti-piratería por installation_id
 Route::post('/validate', [LicenseValidationController::class, 'validateKey']);
+
+// Endpoint para consultar actualizaciones (Público)
+Route::get('/check-update', [ReleaseController::class, 'checkUpdate']);
