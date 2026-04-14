@@ -8,29 +8,51 @@ use App\Models\Release;
 
 class ReleaseController extends Controller
 {
-    public function checkUpdate()
+    /**
+     * GET /api/check-update?current_version=1.1.0
+     *
+     * Compara la versión actual del cliente con el último release en la BD.
+     * Limpia el prefijo "v" de ambos lados antes de comparar con version_compare().
+     */
+    public function checkUpdate(Request $request)
     {
         $latestRelease = Release::latest()->first();
 
+        // ── Sin releases en la BD: sistema al día ─────────────────────────
         if (!$latestRelease) {
             return response()->json([
-                'success' => false,
-                'message' => 'No release found',
-                'data'    => null
-            ], 404);
+                'success'          => true,
+                'update_available' => false,
+                'message'          => 'No hay releases registrados.',
+                'data'             => null,
+            ]);
         }
 
+        // ── Limpiar prefijo "v" de la versión guardada en BD ─────────────
+        // El CI/CD guarda "v1.1.1" (del tag de Git). Lo normalizamos a "1.1.1".
+        $serverVersion = ltrim($latestRelease->version, 'vV');
+
+        // ── Limpiar prefijo "v" del parámetro del cliente ─────────────────
+        // El cliente Flutter envía la versión del pubspec: "1.1.0" (sin "v").
+        // Por si acaso viene con "v", lo limpiamos igual.
+        $clientVersion = ltrim($request->query('current_version', '0.0.0'), 'vV');
+
+        // ── Comparación semántica robusta con version_compare de PHP ──────
+        $updateAvailable = version_compare($serverVersion, $clientVersion, '>');
+
         return response()->json([
-            'success' => true,
-            'data' => [
-                'version'      => $latestRelease->version,
+            'success'          => true,
+            'update_available' => $updateAvailable,
+            'data'             => $updateAvailable ? [
+                'version'      => $serverVersion,           // Devolvemos sin "v" para que Flutter compare limpio
                 'download_url' => $latestRelease->download_url,
                 'changelog'    => $latestRelease->changelog,
-                'is_critical'  => $latestRelease->is_critical,
+                'is_critical'  => (bool) $latestRelease->is_critical,
                 'released_at'  => $latestRelease->created_at->toISOString(),
-            ]
+            ] : null,
         ]);
     }
+
 
     /**
      * Llamado por el CI/CD (GitHub Actions) al publicar un nuevo tag.
