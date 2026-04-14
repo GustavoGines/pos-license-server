@@ -14,3 +14,6 @@ Route::post('/validate', [LicenseValidationController::class, 'validateKey']);
 
 // Endpoint para consultar actualizaciones (Público)
 Route::get('/check-update', [ReleaseController::class, 'checkUpdate']);
+
+// Endpoint para que el CI/CD registre un nuevo release (Protegido por token secreto)
+Route::post('/releases/new', [ReleaseController::class, 'store']);
