@@ -8,6 +8,7 @@ class Release extends Model
 {
     protected $fillable = [
         'version',
+        'component',
         'download_url',
         'changelog',
         'is_critical',

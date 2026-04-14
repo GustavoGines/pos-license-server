@@ -16,14 +16,15 @@ class ReleaseController extends Controller
      */
     public function checkUpdate(Request $request)
     {
-        $latestRelease = Release::latest()->first();
+        $component = $request->query('component', 'frontend');
+        $latestRelease = Release::where('component', $component)->latest()->first();
 
         // ── Sin releases en la BD: sistema al día ─────────────────────────
         if (!$latestRelease) {
             return response()->json([
                 'success'          => true,
                 'update_available' => false,
-                'message'          => 'No hay releases registrados.',
+                'message'          => "No hay releases registrados para el componente: {$component}.",
                 'data'             => null,
             ]);
         }
@@ -69,6 +70,7 @@ class ReleaseController extends Controller
         // ── Validación de campos ───────────────────────────
         $validated = $request->validate([
             'version'      => 'required|string|max:20',
+            'component'    => 'nullable|string|max:50',
             'download_url' => 'required|url|max:500',
             'changelog'    => 'nullable|string',
             'is_critical'  => 'nullable|boolean',
@@ -77,6 +79,7 @@ class ReleaseController extends Controller
         // ── Crear el release en la BD ──────────────────────
         $release = Release::create([
             'version'      => $validated['version'],
+            'component'    => $validated['component'] ?? 'frontend',
             'download_url' => $validated['download_url'],
             'changelog'    => $validated['changelog'] ?? "Release {$validated['version']}.",
             'is_critical'  => $validated['is_critical'] ?? false,
