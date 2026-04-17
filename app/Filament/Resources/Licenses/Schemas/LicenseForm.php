@@ -72,12 +72,12 @@ class LicenseForm
                     ->label('Módulos Habilitados')
                     ->multiple()
                     ->options([
-                        'fast_pos'          => 'Caja Rápida',
-                        'z_reports'         => 'Reportes Z',
-                        'quotes'            => 'Presupuestos (PDF/WA)',
-                        'current_accounts'  => 'Cuentas Corrientes (Fiado)',
-                        'multiple_prices'   => 'Listas de Precios (Mayorista/Tarjeta)',
-                        'multi_caja'        => 'Múltiples Cajas / Terminales',
+                        'fast_pos'          => '⚡ Caja Rápida',
+                        'z_reports'         => '🧾 Reportes Z',
+                        'quotes'            => '📝 Presupuestos (PDF/WA)',
+                        'current_accounts'  => '📘 Cuentas Corrientes (Fiado)',
+                        'multiple_prices'   => '🏷️ Listas de Precios (Mayorista/Tarjeta)',
+                        'multi_caja'        => '🖥️ Múltiples Cajas / Terminales',
                         'advanced_reports'  => '📊 Reportes Gerenciales (Balances, Excel, PDF)',
                         'predictive_alerts' => '🧠 Inteligencia Logística (Alertas Predictivas)',
                         'logistics'         => '🚚 Logística y Remitos',
