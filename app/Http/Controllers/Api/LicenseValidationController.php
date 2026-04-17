@@ -81,12 +81,19 @@ class LicenseValidationController extends Controller
 
         return response()->json([
             'status'                => 'active',
-            'plan'                  => $license->plan,
+            // Retrocompatibilidad: Si el cliente viejo usa hardcoded 'basic', devolvemos 'basic'
+            'plan'                  => ($license->plan === 'basico') ? 'basic' : (($license->plan === 'premium') ? 'pro' : $license->plan),
             'plan_type'             => $license->plan_type,
             'server_time'           => now()->toIso8601String(),
             'client_name'           => $license->client_name,
             'business_type'         => $license->business_type,
+            // Nombres nuevos para clientes nuevos
+            'plan_espanol'          => $license->plan, 
             'features'              => $features,
+            // --- CAMPOS LEGACY OBLIGATORIOS PARA CLIENTES VIEJOS EN PRODUCCIÓN ---
+            'addons'                => $addons,
+            'has_advanced_reports'  => in_array('advanced_reports', $addons),
+            'has_predictive_alerts' => in_array('predictive_alerts', $addons),
         ], 200);
     }
 
