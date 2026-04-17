@@ -90,8 +90,7 @@ class LicenseValidationController extends Controller
             // Nombres nuevos para clientes nuevos
             'plan_espanol'          => $license->plan, 
             'features'              => $features,
-            // --- CAMPOS LEGACY OBLIGATORIOS PARA CLIENTES VIEJOS EN PRODUCCIÓN ---
-            'addons'                => $addons,
+            // --- CAMPOS LEGACY PARA CLIENTES VIEJOS EN PRODUCCIÓN ---
             'has_advanced_reports'  => in_array('advanced_reports', $addons),
             'has_predictive_alerts' => in_array('predictive_alerts', $addons),
         ], 200);
