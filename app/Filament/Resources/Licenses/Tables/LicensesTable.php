@@ -21,7 +21,7 @@ class LicensesTable
         return $table
             ->columns([
                 TextColumn::make('client_name')
-                    ->label('Client')
+                    ->label('Cliente')
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
@@ -49,15 +49,18 @@ class LicensesTable
                     ->tooltip(fn (string $state): string => $state),
 
                 TextColumn::make('plan')
-                    ->label('Plan')
+                    ->label('Nivel')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
-                        'basic'      => 'gray',
-                        'pro'        => 'info',
-                        'enterprise' => 'success',
-                        default      => 'gray',
+                        'basico'  => 'gray',
+                        'premium' => 'success',
+                        default   => 'gray',
                     })
-                    ->formatStateUsing(fn (string $state) => ucfirst($state))
+                    ->formatStateUsing(fn (string $state) => match ($state) {
+                        'basico'  => 'Básico',
+                        'premium' => 'Premium',
+                        default   => ucfirst($state),
+                    })
                     ->sortable(),
 
                 TextColumn::make('plan_type')
@@ -72,12 +75,12 @@ class LicensesTable
                     ->sortable(),
 
                 IconColumn::make('is_active')
-                    ->label('Active')
+                    ->label('Activa')
                     ->boolean()
                     ->sortable(),
 
                 TextColumn::make('expiration_date')
-                    ->label('Expires')
+                    ->label('Expira')
                     ->date('d/m/Y')
                     ->sortable()
                     ->color(fn ($state, $record): ?string => $record->expiration_date?->isPast() ? 'danger' : null),
@@ -96,7 +99,7 @@ class LicensesTable
                     ->toggleable(),
 
                 TextColumn::make('created_at')
-                    ->label('Created')
+                    ->label('Creada')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -105,9 +108,8 @@ class LicensesTable
                 SelectFilter::make('plan')
                     ->label('Nivel')
                     ->options([
-                        'basic'      => 'Basic',
-                        'pro'        => 'Pro',
-                        'enterprise' => 'Enterprise',
+                        'basico'  => 'Básico',
+                        'premium' => 'Premium',
                     ]),
 
                 SelectFilter::make('plan_type')
@@ -118,9 +120,9 @@ class LicensesTable
                     ]),
 
                 TernaryFilter::make('is_active')
-                    ->label('Status')
-                    ->trueLabel('Active only')
-                    ->falseLabel('Inactive only')
+                    ->label('Estado')
+                    ->trueLabel('Solo activas')
+                    ->falseLabel('Solo inactivas')
                     ->native(false),
             ])
             ->recordActions([
