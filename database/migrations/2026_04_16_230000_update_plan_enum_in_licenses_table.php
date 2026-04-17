@@ -19,6 +19,8 @@ return new class extends Migration
         if ($driver === 'pgsql') {
             // En PostgreSQL, Laravel puede haber creado un constraint de validación
             DB::statement("ALTER TABLE licenses DROP CONSTRAINT IF EXISTS licenses_plan_check");
+            // También la versión con el nombre original por si existe en Supabase (antes de renombrar la columna)
+            DB::statement("ALTER TABLE licenses DROP CONSTRAINT IF EXISTS licenses_plan_type_check");
             // Pasamos a VARCHAR para permitir la migración sin problemas de tipo ENUM estricto
             DB::statement("ALTER TABLE licenses ALTER COLUMN plan TYPE VARCHAR(50)");
         } elseif ($driver === 'mysql' || $driver === 'mariadb') {
@@ -53,6 +55,7 @@ return new class extends Migration
 
         if ($driver === 'pgsql') {
             DB::statement("ALTER TABLE licenses DROP CONSTRAINT IF EXISTS licenses_plan_check");
+            DB::statement("ALTER TABLE licenses DROP CONSTRAINT IF EXISTS licenses_plan_type_check");
             DB::statement("ALTER TABLE licenses ALTER COLUMN plan TYPE VARCHAR(50)");
         } elseif ($driver === 'mysql' || $driver === 'mariadb') {
             DB::statement("ALTER TABLE licenses MODIFY plan VARCHAR(50) NOT NULL DEFAULT 'basic'");
