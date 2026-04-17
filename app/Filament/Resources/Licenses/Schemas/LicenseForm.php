@@ -15,7 +15,7 @@ class LicenseForm
         return $schema
             ->components([
                 TextInput::make('client_name')
-                    ->label('Client Name')
+                    ->label('Nombre del Cliente')
                     ->required()
                     ->maxLength(255)
                     ->columnSpan(['default' => 2]),
@@ -39,12 +39,11 @@ class LicenseForm
                 Select::make('plan')
                     ->label('Nivel de Acceso')
                     ->options([
-                        'basic'      => 'Basic',
-                        'pro'        => 'Pro',
-                        'enterprise' => 'Enterprise',
+                        'basico'  => 'Básico',
+                        'premium' => 'Premium',
                     ])
                     ->required()
-                    ->default('basic'),
+                    ->default('basico'),
 
                 Select::make('plan_type')
                     ->label('Modelo de Facturación')
@@ -57,7 +56,7 @@ class LicenseForm
                     ->live(),
 
                 DatePicker::make('expiration_date')
-                    ->label('Expiration Date')
+                    ->label('Fecha de Expiración')
                     ->required(fn (callable $get) => $get('plan_type') === 'saas')
                     ->hidden(fn (callable $get) => $get('plan_type') === 'lifetime')
                     ->nullable(),
@@ -81,11 +80,12 @@ class LicenseForm
                         'multi_caja'        => 'Múltiples Cajas / Terminales',
                         'advanced_reports'  => '📊 Reportes Gerenciales (Balances, Excel, PDF)',
                         'predictive_alerts' => '🧠 Inteligencia Logística (Alertas Predictivas)',
+                        'logistics'         => '🚚 Logística y Remitos',
                     ])
                     ->columnSpanFull(),
 
                 Toggle::make('is_active')
-                    ->label('Active')
+                    ->label('Activa')
                     ->default(true)
                     ->columnSpanFull(),
             ]);
