@@ -9,36 +9,41 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * Usa try/catch para tolerar que el constraint ya haya sido eliminado
-     * o nunca haya existido (ej: base de datos en Supabase/PostgreSQL nueva).
+     * En PostgreSQL no podemos capturar errores con try/catch porque la BD 
+     * aborta inmediatamente la transacción entera (SQLSTATE[25P02]). 
+     * Por ende, usamos sentencias puras con IF EXISTS.
      */
     public function up(): void
     {
-        // Intentar eliminar el constraint de unicidad simple sobre 'version'.
-        // Si no existe (ej: PostgreSQL en Supabase), se ignora el error silenciosamente.
-        try {
-            Schema::table('releases', function (Blueprint $table) {
-                $table->dropUnique(['version']);
-            });
-        } catch (\Throwable $e) {
-            // El constraint no existía; no hay nada que hacer.
-        }
-
-        // Crear el nuevo constraint compuesto (version + component) solo si no existe.
-        // dropUnique genera el nombre estándar de Laravel: releases_version_component_unique
         $driver = DB::getDriverName();
-        $constraintExists = false;
 
         if ($driver === 'pgsql') {
+            // Eliminar de forma segura sin disparar Errores SQL (que abortarían la transacción)
+            DB::statement('ALTER TABLE releases DROP CONSTRAINT IF EXISTS releases_version_unique');
+            
+            // Comprobar existencia antes de crear para evitar Duplicate Constraint Error
             $constraintExists = DB::selectOne(
                 "SELECT 1 FROM pg_constraint WHERE conname = 'releases_version_component_unique'"
             ) !== null;
-        }
 
-        if (!$constraintExists) {
+            if (!$constraintExists) {
+                DB::statement('ALTER TABLE releases ADD CONSTRAINT releases_version_component_unique UNIQUE (version, component)');
+            }
+        } else {
+            // Entornos locales (SQLite / MySQL) - try/catch es suficiente ya que suelen 
+            // tolerarlo o simplemente se corren de a una sentencia.
             Schema::table('releases', function (Blueprint $table) {
-                $table->unique(['version', 'component']);
+                $indexes = Schema::getIndexes('releases');
+                $hasVersionIndex = collect($indexes)->contains('name', 'releases_version_unique');
+                
+                if ($hasVersionIndex) {
+                    $table->dropUnique('releases_version_unique');
+                }
+                
+                $hasCompIndex = collect($indexes)->contains('name', 'releases_version_component_unique');
+                if (!$hasCompIndex) {
+                    $table->unique(['version', 'component']);
+                }
             });
         }
     }
@@ -48,20 +53,30 @@ return new class extends Migration
      */
     public function down(): void
     {
-        try {
-            Schema::table('releases', function (Blueprint $table) {
-                $table->dropUnique(['version', 'component']);
-            });
-        } catch (\Throwable $e) {
-            // El constraint no existía.
-        }
+        $driver = DB::getDriverName();
 
-        try {
+        if ($driver === 'pgsql') {
+            DB::statement('ALTER TABLE releases DROP CONSTRAINT IF EXISTS releases_version_component_unique');
+            
+            $constraintExists = DB::selectOne(
+                "SELECT 1 FROM pg_constraint WHERE conname = 'releases_version_unique'"
+            ) !== null;
+
+            if (!$constraintExists) {
+                DB::statement('ALTER TABLE releases ADD CONSTRAINT releases_version_unique UNIQUE (version)');
+            }
+        } else {
             Schema::table('releases', function (Blueprint $table) {
-                $table->unique('version');
+                $indexes = Schema::getIndexes('releases');
+                
+                if (collect($indexes)->contains('name', 'releases_version_component_unique')) {
+                    $table->dropUnique('releases_version_component_unique');
+                }
+                
+                if (!collect($indexes)->contains('name', 'releases_version_unique')) {
+                    $table->unique('version');
+                }
             });
-        } catch (\Throwable $e) {
-            // Ya existía o no aplica.
         }
     }
 };
