@@ -10,9 +10,8 @@ class License extends Model
 {
     use HasFactory;
 
-    const PLAN_BASIC = 'basic';
-    const PLAN_PRO = 'pro';
-    const PLAN_ENTERPRISE = 'enterprise';
+    const PLAN_BASICO  = 'basico';
+    const PLAN_PREMIUM = 'premium';
 
     const TYPE_SAAS = 'saas';
     const TYPE_LIFETIME = 'lifetime';
@@ -25,7 +24,7 @@ class License extends Model
         'client_name',
         'business_type',
         'api_key',
-        'plan',              // Nivel de acceso (basic, pro, enterprise)
+        'plan',              // Nivel de acceso (basico, premium)
         'plan_type',         // Modelo de facturación (saas, lifetime)
         'is_active',
         'expiration_date',
