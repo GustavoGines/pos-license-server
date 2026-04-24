@@ -81,6 +81,7 @@ class LicenseForm
                         'advanced_reports'  => '📊 Reportes Gerenciales (Balances, Excel, PDF)',
                         'predictive_alerts' => '🧠 Inteligencia Logística (Alertas Predictivas)',
                         'logistics'         => '🚚 Logística y Remitos',
+                        'checks'            => '💵 Gestión de Cheques',
                     ])
                     ->columnSpanFull(),
 
