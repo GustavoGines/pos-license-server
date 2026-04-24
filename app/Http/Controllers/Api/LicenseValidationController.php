@@ -62,7 +62,7 @@ class LicenseValidationController extends Controller
 
         // 2. Módulos por Plan (Premium para Retail y Ferretería)
         if (in_array($license->plan, ['premium', 'pro', 'enterprise'])) {
-            array_push($businessAddons, 'multi_caja', 'current_accounts', 'advanced_reports', 'predictive_alerts');
+            array_push($businessAddons, 'multi_caja', 'current_accounts', 'advanced_reports', 'predictive_alerts', 'checks');
         }
 
         // 3. Módulos Exclusivos por Vertical / Rubro
@@ -114,6 +114,7 @@ class LicenseValidationController extends Controller
             'advanced_reports',
             'predictive_alerts',
             'logistics',
+            'checks',
         ];
 
         $map = [];
