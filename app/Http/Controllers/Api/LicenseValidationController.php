@@ -65,11 +65,17 @@ class LicenseValidationController extends Controller
             array_push($businessAddons, 'multi_caja', 'current_accounts', 'advanced_reports', 'predictive_alerts', 'checks');
         }
 
-        // 3. Módulos Exclusivos por Vertical / Rubro
-        // La Ferretería SIEMPRE tiene presupuestos, múltiples listas y remitos, sin importar su plan (incluso Basico)
-        // Retail NUNCA los tiene, por más que sea Premium.
+        // 3. Módulos por Plan Premium (disponibles para TODOS los rubros con plan premium)
+        // multiple_prices está disponible para Retail Premium y Ferretería Premium.
+        if (in_array($license->plan, ['premium', 'pro', 'enterprise'])) {
+            array_push($businessAddons, 'multiple_prices');
+        }
+
+        // 4. Módulos Exclusivos por Vertical / Rubro (sin importar el plan)
+        // quotes y logistics son funcionalidades propias del flujo de Ferretería/Corralon.
+        // Retail no los usa aunque tenga plan Premium.
         if ($license->business_type === 'hardware_store') {
-            array_push($businessAddons, 'quotes', 'multiple_prices', 'logistics');
+            array_push($businessAddons, 'quotes', 'logistics');
         }
 
         // Módulos extra/individuales pagados por el cliente (ej: reportes_gerenciales para un plan Básico)
