@@ -2,26 +2,30 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\ReleaseResource\Pages;
+use App\Filament\Resources\ReleaseResource\Pages\CreateRelease;
+use App\Filament\Resources\ReleaseResource\Pages\EditRelease;
+use App\Filament\Resources\ReleaseResource\Pages\ListReleases;
 use App\Models\Release;
+use BackedEnum;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables\Columns\BadgeColumn;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\DeleteBulkAction;
 
 class ReleaseResource extends Resource
 {
     protected static ?string $model = Release::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rocket-launch';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRocketLaunch;
 
     protected static ?string $navigationLabel = 'Versiones / Releases';
 
@@ -32,11 +36,11 @@ class ReleaseResource extends Resource
     protected static ?int $navigationSort = 2;
 
     // ─────────────────────────────────────────────────────────────────────────
-    // FORMULARIO
+    // FORMULARIO (Filament v5: Schema con ->components())
     // ─────────────────────────────────────────────────────────────────────────
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form->schema([
+        return $schema->components([
             TextInput::make('version')
                 ->label('Versión (SemVer)')
                 ->placeholder('Ej: 1.3.0')
@@ -60,7 +64,7 @@ class ReleaseResource extends Resource
                 ->maxLength(500)
                 ->columnSpanFull(),
 
-            // ── CHANGELOG: Campo clave. Texto libre para el Release Manager. ──
+            // ── Campo clave: Changelog editable manualmente por el Release Manager ──
             Textarea::make('changelog')
                 ->label('📝 Novedades (Changelog para el cliente)')
                 ->helperText('Este texto se muestra en el diálogo "Actualización Disponible" del POS. Podés usar emojis y saltos de línea.')
@@ -84,7 +88,7 @@ class ReleaseResource extends Resource
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // TABLA
+    // TABLA (Filament v5: recordActions / toolbarActions)
     // ─────────────────────────────────────────────────────────────────────────
     public static function table(Table $table): Table
     {
@@ -114,8 +118,8 @@ class ReleaseResource extends Resource
                 IconColumn::make('is_critical')
                     ->label('Crítica')
                     ->boolean()
-                    ->trueIcon('heroicon-o-exclamation-triangle')
-                    ->falseIcon('heroicon-o-check-circle')
+                    ->trueIcon(Heroicon::OutlinedExclamationTriangle)
+                    ->falseIcon(Heroicon::OutlinedCheckCircle)
                     ->trueColor('danger')
                     ->falseColor('success'),
 
@@ -130,18 +134,20 @@ class ReleaseResource extends Resource
                     ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
-            ->actions([
+            ->recordActions([
                 EditAction::make()->label('Editar Changelog'),
             ])
-            ->bulkActions([
-                DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
             ]);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
     // PÁGINAS
     // ─────────────────────────────────────────────────────────────────────────
-    public static function getRelationManagers(): array
+    public static function getRelations(): array
     {
         return [];
     }
@@ -149,9 +155,9 @@ class ReleaseResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListReleases::route('/'),
-            'create' => Pages\CreateRelease::route('/create'),
-            'edit'   => Pages\EditRelease::route('/{record}/edit'),
+            'index'  => ListReleases::route('/'),
+            'create' => CreateRelease::route('/create'),
+            'edit'   => EditRelease::route('/{record}/edit'),
         ];
     }
 }
