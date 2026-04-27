@@ -158,7 +158,7 @@ class ReleaseResource extends Resource
             ])
             ->defaultSort('created_at', 'desc')
             ->recordActions([
-                EditAction::make()->label('Editar Changelog'),
+                EditAction::make()->label('Editar / Promover'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
