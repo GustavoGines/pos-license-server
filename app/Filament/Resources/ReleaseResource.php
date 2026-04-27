@@ -56,6 +56,15 @@ class ReleaseResource extends Resource
                 ->required()
                 ->default('frontend'),
 
+            Select::make('channel')
+                ->label('Canal de Distribución')
+                ->options([
+                    'beta'   => '🐛 Desarrollo (Beta - Invisible para clientes)',
+                    'stable' => '🚀 Producción (Stable - Público)',
+                ])
+                ->required()
+                ->default('beta'),
+
             TextInput::make('download_url')
                 ->label('URL de Descarga (ZIP)')
                 ->placeholder('https://pub-xxxx.r2.dev/releases/update_v1.3.0.zip')
@@ -113,6 +122,20 @@ class ReleaseResource extends Resource
                         'backend'  => '⚙️ Backend',
                         'frontend' => '🖥️ Frontend',
                         default    => $state,
+                    }),
+
+                TextColumn::make('channel')
+                    ->label('Canal')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'stable'  => 'success',
+                        'beta'    => 'warning',
+                        default   => 'gray',
+                    })
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'stable'  => '🚀 Stable',
+                        'beta'    => '🐛 Beta',
+                        default   => $state,
                     }),
 
                 IconColumn::make('is_critical')

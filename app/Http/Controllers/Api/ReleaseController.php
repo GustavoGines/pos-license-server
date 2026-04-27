@@ -17,7 +17,12 @@ class ReleaseController extends Controller
     public function checkUpdate(Request $request)
     {
         $component = $request->query('component', 'frontend');
-        $latestRelease = Release::where('component', $component)->latest()->first();
+        $channel = $request->query('channel', 'stable'); // Default to stable for legacy clients
+        
+        $latestRelease = Release::where('component', $component)
+            ->where('channel', $channel)
+            ->latest()
+            ->first();
 
         // ── Sin releases en la BD: sistema al día ─────────────────────────
         if (!$latestRelease) {
@@ -74,6 +79,7 @@ class ReleaseController extends Controller
             'download_url' => 'required|url|max:500',
             'changelog'    => 'nullable|string',
             'is_critical'  => 'nullable|boolean',
+            'channel'      => 'nullable|string|max:20',
         ]);
 
         // ── Crear el release en la BD ──────────────────────
@@ -83,6 +89,7 @@ class ReleaseController extends Controller
             'download_url' => $validated['download_url'],
             'changelog'    => $validated['changelog'] ?? "Release {$validated['version']}.",
             'is_critical'  => $validated['is_critical'] ?? false,
+            'channel'      => $validated['channel'] ?? 'beta', // CI/CD deployments are beta by default
         ]);
 
         return response()->json([
