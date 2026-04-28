@@ -12,6 +12,7 @@ class Release extends Model
         'download_url',
         'changelog',
         'is_critical',
+        'channel',
     ];
 
     protected $casts = [
