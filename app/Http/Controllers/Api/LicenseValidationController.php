@@ -96,9 +96,6 @@ class LicenseValidationController extends Controller
             // Nombres nuevos para clientes nuevos
             'plan_espanol'          => $license->plan, 
             'features'              => $features,
-            // --- CAMPOS LEGACY PARA CLIENTES VIEJOS EN PRODUCCIÓN ---
-            'has_advanced_reports'  => in_array('advanced_reports', $addons),
-            'has_predictive_alerts' => in_array('predictive_alerts', $addons),
         ], 200);
     }
 
@@ -127,18 +124,22 @@ class LicenseValidationController extends Controller
         foreach ($allFeatures as $feature) {
             $hasAddon = in_array($feature, $addons);
 
+            // Exclusividad estricta por Rubro para ciertos módulos (Ferretería)
+            // Esto anula cualquier selección errónea en allowed_addons si se cambia a Retail
+            if (in_array($feature, ['logistics', 'quotes'])) {
+                if (!$isHardwareStore) {
+                    $map[$feature] = false;
+                    continue;
+                }
+            }
+
             // Respetar estrictamente los módulos individuales que el cliente haya adquirido
             if (in_array($feature, $adminAddons)) {
                 $map[$feature] = true;
                 continue;
             }
 
-            // Exclusividad doble por Rubro para ciertos módulos
-            if (in_array($feature, ['logistics', 'quotes'])) {
-                $map[$feature] = $hasAddon && $isHardwareStore;
-            } else {
-                $map[$feature] = $hasAddon;
-            }
+            $map[$feature] = $hasAddon;
         }
 
         return $map;
