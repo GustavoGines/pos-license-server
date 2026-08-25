@@ -50,8 +50,9 @@ class ReleaseResource extends Resource
             Select::make('component')
                 ->label('Componente')
                 ->options([
-                    'frontend' => '🖥️ Frontend (App de Caja)',
+                    'frontend' => '🖥️ Frontend (App de Caja - Windows)',
                     'backend'  => '⚙️ Backend (Servidor Local)',
+                    'android'  => '📱 Android (App Móvil - APK)',
                 ])
                 ->required()
                 ->default('frontend'),
@@ -116,11 +117,13 @@ class ReleaseResource extends Resource
                     ->color(fn (string $state): string => match ($state) {
                         'backend'  => 'warning',
                         'frontend' => 'info',
+                        'android'  => 'success',
                         default    => 'gray',
                     })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'backend'  => '⚙️ Backend',
                         'frontend' => '🖥️ Frontend',
+                        'android'  => '📱 Android',
                         default    => $state,
                     }),
 
