@@ -78,6 +78,7 @@ class LicenseForm
                         'current_accounts'  => '📘 Cuentas Corrientes (Fiado)',
                         'multiple_prices'   => '🏷️ Listas de Precios (Mayorista/Tarjeta)',
                         'multi_caja'        => '🖥️ Múltiples Cajas / Terminales',
+                        'mobile_app'        => '📱 App Móvil (Inventario y Ventas)',
                         'advanced_reports'  => '📊 Reportes Gerenciales (Balances, Excel, PDF)',
                         'predictive_alerts' => '🧠 Inteligencia Logística (Alertas Predictivas)',
                         'logistics'         => '🚚 Logística y Remitos',
