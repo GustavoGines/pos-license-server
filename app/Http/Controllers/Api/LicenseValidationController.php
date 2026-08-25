@@ -118,6 +118,8 @@ class LicenseValidationController extends Controller
             'predictive_alerts',
             'logistics',
             'checks',
+            'mobile_app',
+            'remote_access',
         ];
 
         $map = [];
