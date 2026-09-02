@@ -126,7 +126,7 @@ class LicensesTable
                     ->native(false),
             ])
             ->recordActions([
-                \Filament\Tables\Actions\Action::make('reset_hardware_lock')
+                Action::make('reset_hardware_lock')
                     ->label('Liberar Hardware')
                     ->icon('heroicon-o-lock-open')
                     ->color('warning')
@@ -138,14 +138,14 @@ class LicensesTable
                             $record->update([
                                 'installation_id' => null,
                             ]);
-                            \Filament\Notifications\Notification::make()
+                            Notification::make()
                                 ->title('Candado de hardware liberado')
                                 ->success()
                                 ->send();
                         }
                     })
                     ->visible(fn ($record) => $record !== null && !empty($record->installation_id)),
-                \Filament\Tables\Actions\Action::make('copy_api_key')
+                Action::make('copy_api_key')
                     ->label('')
                     ->icon(Heroicon::OutlinedClipboard)
                     ->color('gray')
