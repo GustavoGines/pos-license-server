@@ -126,7 +126,24 @@ class LicensesTable
                     ->native(false),
             ])
             ->recordActions([
-                Action::make('copy_api_key')
+                \Filament\Tables\Actions\Action::make('reset_hardware_lock')
+                    ->label('Liberar Hardware')
+                    ->icon(\Filament\Support\Icons\Heroicon::OutlinedLockOpen)
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->modalHeading('¿Liberar candado de hardware?')
+                    ->modalDescription('Esto vaciará el Installation ID. La licencia quedará libre para ser usada en una computadora diferente. ¿Deseas continuar?')
+                    ->action(function ($record) {
+                        $record->update([
+                            'installation_id' => null,
+                        ]);
+                        \Filament\Notifications\Notification::make()
+                            ->title('Candado de hardware liberado')
+                            ->success()
+                            ->send();
+                    })
+                    ->visible(fn ($record) => !empty($record->installation_id)),
+                \Filament\Tables\Actions\Action::make('copy_api_key')
                     ->label('')
                     ->icon(Heroicon::OutlinedClipboard)
                     ->color('gray')
