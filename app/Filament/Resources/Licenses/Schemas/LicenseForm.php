@@ -79,11 +79,12 @@ class LicenseForm
                         'multiple_prices'   => '🏷️ Listas de Precios (Mayorista/Tarjeta)',
                         'multi_caja'        => '🖥️ Múltiples Cajas / Terminales',
                         'mobile_app'        => '📱 App Móvil (Inventario y Ventas)',
-                        'remote_access'     => '🌍 Acceso Remoto (Cloudflare / Internet)',
+                        'remote_access'     => '🌐 Acceso Remoto (Cloudflare / Internet)',
                         'advanced_reports'  => '📊 Reportes Gerenciales (Balances, Excel, PDF)',
                         'predictive_alerts' => '🧠 Inteligencia Logística (Alertas Predictivas)',
                         'logistics'         => '🚚 Logística y Remitos',
                         'checks'            => '💵 Gestión de Cheques',
+                        'suppliers'         => '📦 Gestión de Proveedores (B2B)',
                     ])
                     ->columnSpanFull(),
 
