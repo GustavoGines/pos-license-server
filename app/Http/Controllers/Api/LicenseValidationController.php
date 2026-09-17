@@ -120,6 +120,7 @@ class LicenseValidationController extends Controller
             'checks',
             'mobile_app',
             'remote_access',
+            'suppliers',
         ];
 
         $map = [];
