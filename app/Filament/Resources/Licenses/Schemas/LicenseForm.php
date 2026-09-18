@@ -85,6 +85,7 @@ class LicenseForm
                         'logistics'         => '🚚 Logística y Remitos',
                         'checks'            => '💵 Gestión de Cheques',
                         'suppliers'         => '📦 Gestión de Proveedores (B2B)',
+                        'expenses'          => '💸 Gestión de Gastos y Movimientos',
                     ])
                     ->columnSpanFull(),
 
