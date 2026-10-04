@@ -86,6 +86,9 @@ class LicenseForm
                         'checks'            => '💵 Gestión de Cheques',
                         'suppliers'         => '📦 Gestión de Proveedores (B2B)',
                         'expenses'          => '💸 Gestión de Gastos y Movimientos',
+                        'multi_rubro'       => '🗂️ Multi-Rubro (Jerarquía Rubros → Categorías)',
+                        'mercadopago_qr'    => '📲 Cobro con Mercado Pago QR',
+                        'arca_afip'         => '🧾 Facturación Electrónica ARCA (AFIP)',
                     ])
                     ->columnSpanFull(),
 

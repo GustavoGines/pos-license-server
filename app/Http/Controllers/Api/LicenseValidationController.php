@@ -62,7 +62,7 @@ class LicenseValidationController extends Controller
 
         // 2. Módulos por Plan (Premium para Retail y Ferretería)
         if (in_array($license->plan, ['premium', 'pro', 'enterprise'])) {
-            array_push($businessAddons, 'multi_caja', 'current_accounts', 'advanced_reports', 'predictive_alerts', 'checks', 'suppliers', 'expenses');
+            array_push($businessAddons, 'multi_caja', 'current_accounts', 'advanced_reports', 'predictive_alerts', 'checks', 'suppliers', 'expenses', 'multi_rubro', 'mercadopago_qr', 'arca_afip');
         }
 
         // 3. Módulos por Plan Premium (disponibles para TODOS los rubros con plan premium)
@@ -122,6 +122,9 @@ class LicenseValidationController extends Controller
             'remote_access',
             'suppliers',
             'expenses',
+            'multi_rubro',
+            'mercadopago_qr',
+            'arca_afip',
         ];
 
         $map = [];

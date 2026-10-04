@@ -56,6 +56,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | CI/CD Deploy Token
+    |--------------------------------------------------------------------------
+    |
+    | Token secreto que el pipeline de CI/CD envía a POST /api/releases/new.
+    | Debe leerse siempre vía config('app.ci_deploy_token'): en producción se
+    | ejecuta `config:cache`, y env() fuera de config devuelve null.
+    |
+    */
+
+    'ci_deploy_token' => env('CI_DEPLOY_TOKEN'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |
