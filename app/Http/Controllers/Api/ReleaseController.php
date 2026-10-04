@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Models\Release;
 
 class ReleaseController extends Controller
@@ -67,10 +68,22 @@ class ReleaseController extends Controller
     public function store(Request $request)
     {
         // ── Validación del token secreto ───────────────────
-        $expectedToken = config('app.ci_deploy_token', env('CI_DEPLOY_TOKEN'));
-        if ($request->input('token') !== $expectedToken) {
+        // Se lee SOLO desde config(): con `config:cache` (producción) env() devuelve null.
+        // Si el token esperado no está configurado, se rechaza siempre (fail-closed).
+        $expectedToken = (string) config('app.ci_deploy_token');
+        $rawToken = $request->input('token');
+        $providedToken = is_string($rawToken) ? $rawToken : '';
+
+        if ($expectedToken === '') {
+            Log::error('ReleaseController: CI_DEPLOY_TOKEN no está configurado; se rechaza el registro de releases.');
+
             return response()->json(['error' => 'Unauthorized'], 401);
         }
+
+        if (!hash_equals($expectedToken, $providedToken)) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
 
         // ── Validación de campos ───────────────────────────
         $validated = $request->validate([
