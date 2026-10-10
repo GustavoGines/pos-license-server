@@ -58,6 +58,7 @@ class PlanValidationTest extends TestCase
         $this->assertFalse($features['multi_rubro'], 'multi_rubro must be false in basic plan');
         $this->assertFalse($features['mercadopago_qr'], 'mercadopago_qr must be false in basic plan');
         $this->assertFalse($features['arca_afip'], 'arca_afip must be false in basic plan');
+        $this->assertFalse($features['ecommerce_sync'], 'ecommerce_sync must be false in basic plan');
 
         // Vertical & Addon features: MUST be false
         $this->assertFalse($features['quotes'], 'quotes must be false for retail basic');
@@ -102,7 +103,7 @@ class PlanValidationTest extends TestCase
         $this->assertTrue($features['fast_pos'], 'fast_pos must be true in premium plan');
         $this->assertTrue($features['z_reports'], 'z_reports must be true in premium plan');
 
-        // All 11 Premium features: MUST be true
+        // All 12 Premium features: MUST be true
         $this->assertTrue($features['multi_caja'], 'multi_caja must be true in premium plan');
         $this->assertTrue($features['current_accounts'], 'current_accounts must be true in premium plan');
         $this->assertTrue($features['advanced_reports'], 'advanced_reports must be true in premium plan');
@@ -114,6 +115,7 @@ class PlanValidationTest extends TestCase
         $this->assertTrue($features['multi_rubro'], 'multi_rubro must be true in premium plan (Phase 0/1)');
         $this->assertTrue($features['mercadopago_qr'], 'mercadopago_qr must be true in premium plan (Phase 0/1)');
         $this->assertTrue($features['arca_afip'], 'arca_afip must be true in premium plan (Phase 0/1)');
+        $this->assertTrue($features['ecommerce_sync'], 'ecommerce_sync must be true in premium plan (Phase 6)');
 
         // Hardware store exclusive features: MUST be false in Retail vertical
         $this->assertFalse($features['quotes'], 'quotes must be false in retail even if premium');
@@ -172,6 +174,7 @@ class PlanValidationTest extends TestCase
         $this->assertFalse($features['multi_rubro']);
         $this->assertFalse($features['mercadopago_qr']);
         $this->assertFalse($features['arca_afip']);
+        $this->assertFalse($features['ecommerce_sync']);
     }
 
     /**

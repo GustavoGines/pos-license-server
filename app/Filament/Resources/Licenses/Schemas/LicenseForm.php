@@ -89,6 +89,7 @@ class LicenseForm
                         'multi_rubro'       => '🗂️ Multi-Rubro (Jerarquía Rubros → Categorías)',
                         'mercadopago_qr'    => '📲 Cobro con Mercado Pago QR',
                         'arca_afip'         => '🧾 Facturación Electrónica ARCA (AFIP)',
+                        'ecommerce_sync'    => '🛒 Sincronización E-Commerce (Tienda Nube / WooCommerce)',
                     ])
                     ->columnSpanFull(),
 

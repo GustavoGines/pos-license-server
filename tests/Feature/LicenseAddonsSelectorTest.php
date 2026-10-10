@@ -18,12 +18,13 @@ class LicenseAddonsSelectorTest extends TestCase
 {
     use RefreshDatabase;
 
-    private const PHASE_FLAGS = ['multi_rubro', 'mercadopago_qr', 'arca_afip'];
+    private const PHASE_FLAGS = ['multi_rubro', 'mercadopago_qr', 'arca_afip', 'ecommerce_sync'];
 
     /** Flags emitidos por LicenseValidationController::mapFeatures. */
     private const ALL_PREMIUM_ADDONS = [
         'multi_caja', 'current_accounts', 'advanced_reports', 'predictive_alerts', 'checks',
         'suppliers', 'expenses', 'multi_rubro', 'mercadopago_qr', 'arca_afip', 'multiple_prices',
+        'ecommerce_sync',
     ];
 
     private function validate(License $license, string $device = 'device-addons-001')
@@ -56,6 +57,7 @@ class LicenseAddonsSelectorTest extends TestCase
             'mercadopago_qr' => ['mercadopago_qr'],
             'arca_afip'      => ['arca_afip'],
             'suppliers'      => ['suppliers'],
+            'ecommerce_sync' => ['ecommerce_sync'],
         ];
     }
 
@@ -186,6 +188,7 @@ class LicenseAddonsSelectorTest extends TestCase
             'fast_pos', 'z_reports', 'quotes', 'current_accounts', 'multiple_prices', 'multi_caja',
             'mobile_app', 'remote_access', 'advanced_reports', 'predictive_alerts', 'logistics',
             'checks', 'suppliers', 'expenses', 'multi_rubro', 'mercadopago_qr', 'arca_afip',
+            'ecommerce_sync',
         ];
 
         Livewire::test(CreateLicense::class)

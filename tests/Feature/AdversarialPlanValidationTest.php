@@ -11,7 +11,7 @@ class AdversarialPlanValidationTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * Standard list of exactly 17 features expected in the license response.
+     * Standard list of exactly 18 features expected in the license response.
      */
     private const EXPECTED_FEATURES = [
         'fast_pos',
@@ -31,6 +31,7 @@ class AdversarialPlanValidationTest extends TestCase
         'multi_rubro',
         'mercadopago_qr',
         'arca_afip',
+        'ecommerce_sync',
     ];
 
     /**
@@ -81,6 +82,7 @@ class AdversarialPlanValidationTest extends TestCase
         $this->assertFalse($features['multi_rubro']);
         $this->assertFalse($features['mercadopago_qr']);
         $this->assertFalse($features['arca_afip']);
+        $this->assertFalse($features['ecommerce_sync']);
 
         // 4. Vertical and ungranted addons must remain false
         $this->assertFalse($features['quotes']);
@@ -108,6 +110,7 @@ class AdversarialPlanValidationTest extends TestCase
             'multi_rubro',
             'mercadopago_qr',
             'arca_afip',
+            'ecommerce_sync',
         ];
 
         $license = License::create([
@@ -183,8 +186,8 @@ class AdversarialPlanValidationTest extends TestCase
         $this->assertArrayNotHasKey('__proto__', $features);
         $this->assertArrayNotHasKey('constructor', $features);
 
-        // 2. Exact key count must remain strictly 17
-        $this->assertCount(17, $features, 'Feature dictionary must contain strictly 17 keys');
+        // 2. Exact key count must remain strictly 18
+        $this->assertCount(18, $features, 'Feature dictionary must contain strictly 18 keys');
 
         // 3. Base features must remain intact
         $this->assertTrue($features['fast_pos']);
@@ -225,7 +228,7 @@ class AdversarialPlanValidationTest extends TestCase
         // Invalid ones omitted
         $this->assertArrayNotHasKey('bogus_module', $features);
         $this->assertArrayNotHasKey('invalid_hack', $features);
-        $this->assertCount(17, $features);
+        $this->assertCount(18, $features);
     }
 
     /**
@@ -251,7 +254,7 @@ class AdversarialPlanValidationTest extends TestCase
         $features = $response->json('features');
 
         $this->assertTrue($features['suppliers']);
-        $this->assertCount(17, $features);
+        $this->assertCount(18, $features);
     }
 
     /**
@@ -279,12 +282,12 @@ class AdversarialPlanValidationTest extends TestCase
                 'plan' => License::PLAN_PREMIUM,
                 'allowed_addons' => ['quotes', 'logistics'],
             ],
-            'Retail Basic + Full 17 Feature Injection' => [
+            'Retail Basic + Full 18 Feature Injection' => [
                 'business_type' => License::BUSINESS_RETAIL,
                 'plan' => License::PLAN_BASICO,
                 'allowed_addons' => self::EXPECTED_FEATURES,
             ],
-            'Retail Premium + Full 17 Feature Injection' => [
+            'Retail Premium + Full 18 Feature Injection' => [
                 'business_type' => License::BUSINESS_RETAIL,
                 'plan' => License::PLAN_PREMIUM,
                 'allowed_addons' => self::EXPECTED_FEATURES,
@@ -380,7 +383,7 @@ class AdversarialPlanValidationTest extends TestCase
     /**
      * Challenge 4: Schema Invariance & Strict Typing
      * Every feature in the features dictionary must be strictly a boolean (not int, not string, not null).
-     * Every response must have exactly the 17 predefined keys.
+     * Every response must have exactly the 18 predefined keys.
      */
     public function test_adversarial_feature_dictionary_schema_and_types(): void
     {
@@ -411,7 +414,7 @@ class AdversarialPlanValidationTest extends TestCase
             $features = $response->json('features');
 
             $this->assertIsArray($features);
-            $this->assertCount(17, $features, "Test case {$name} did not contain exactly 17 feature keys");
+            $this->assertCount(18, $features, "Test case {$name} did not contain exactly 18 feature keys");
 
             foreach (self::EXPECTED_FEATURES as $expectedKey) {
                 $this->assertArrayHasKey($expectedKey, $features, "Missing key {$expectedKey} in {$name}");
