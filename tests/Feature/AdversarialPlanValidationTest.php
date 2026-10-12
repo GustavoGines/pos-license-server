@@ -11,7 +11,7 @@ class AdversarialPlanValidationTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * Standard list of exactly 17 features expected in the license response.
+     * Standard list of exactly 18 features expected in the license response.
      */
     private const EXPECTED_FEATURES = [
         'fast_pos',
@@ -31,6 +31,7 @@ class AdversarialPlanValidationTest extends TestCase
         'multi_rubro',
         'mercadopago_qr',
         'arca_afip',
+        'ecommerce_sync',
     ];
 
     /**
@@ -66,6 +67,11 @@ class AdversarialPlanValidationTest extends TestCase
         // 1. Base features must be true
         $this->assertTrue($features['fast_pos']);
         $this->assertTrue($features['z_reports']);
+        $this->assertTrue($features['current_accounts']);
+        $this->assertTrue($features['advanced_reports']);
+        $this->assertTrue($features['mercadopago_qr']);
+        $this->assertTrue($features['arca_afip']);
+        $this->assertTrue($features['mobile_app']);
 
         // 2. The 3 overridden features must be true
         $this->assertTrue($features['suppliers'], 'suppliers must be active via concurrent override');
@@ -74,18 +80,14 @@ class AdversarialPlanValidationTest extends TestCase
 
         // 3. All other premium features must remain strictly false
         $this->assertFalse($features['multi_caja']);
-        $this->assertFalse($features['current_accounts']);
-        $this->assertFalse($features['advanced_reports']);
         $this->assertFalse($features['predictive_alerts']);
         $this->assertFalse($features['checks']);
         $this->assertFalse($features['multi_rubro']);
-        $this->assertFalse($features['mercadopago_qr']);
-        $this->assertFalse($features['arca_afip']);
+        $this->assertFalse($features['ecommerce_sync']);
 
         // 4. Vertical and ungranted addons must remain false
         $this->assertFalse($features['quotes']);
         $this->assertFalse($features['logistics']);
-        $this->assertFalse($features['mobile_app']);
         $this->assertFalse($features['remote_access']);
     }
 
@@ -108,6 +110,7 @@ class AdversarialPlanValidationTest extends TestCase
             'multi_rubro',
             'mercadopago_qr',
             'arca_afip',
+            'ecommerce_sync',
         ];
 
         $license = License::create([
@@ -183,8 +186,8 @@ class AdversarialPlanValidationTest extends TestCase
         $this->assertArrayNotHasKey('__proto__', $features);
         $this->assertArrayNotHasKey('constructor', $features);
 
-        // 2. Exact key count must remain strictly 17
-        $this->assertCount(17, $features, 'Feature dictionary must contain strictly 17 keys');
+        // 2. Exact key count must remain strictly 18
+        $this->assertCount(18, $features, 'Feature dictionary must contain strictly 18 keys');
 
         // 3. Base features must remain intact
         $this->assertTrue($features['fast_pos']);
@@ -225,7 +228,7 @@ class AdversarialPlanValidationTest extends TestCase
         // Invalid ones omitted
         $this->assertArrayNotHasKey('bogus_module', $features);
         $this->assertArrayNotHasKey('invalid_hack', $features);
-        $this->assertCount(17, $features);
+        $this->assertCount(18, $features);
     }
 
     /**
@@ -251,57 +254,45 @@ class AdversarialPlanValidationTest extends TestCase
         $features = $response->json('features');
 
         $this->assertTrue($features['suppliers']);
-        $this->assertCount(17, $features);
+        $this->assertCount(18, $features);
     }
 
     /**
-     * Challenge 3: Hardware store exclusive features (quotes, logistics) CANNOT be acquired by retail
-     * under ANY circumstances.
-     *
-     * We stress-test:
-     * - Retail Basic with quotes/logistics in allowed_addons
-     * - Retail Premium with quotes/logistics in allowed_addons
-     * - Retail Basic with ALL 17 features explicitly injected in allowed_addons
-     * - Retail Premium with ALL 17 features explicitly injected in allowed_addons
-     * - Arbitrary/unrecognized business_type (e.g., restaurant) with Basic + quotes/logistics
-     * - Arbitrary/unrecognized business_type (e.g., services) with Premium + quotes/logistics
+     * Challenge 3: Hardware store exclusive features (quotes, logistics) are NOT granted by default
+     * to non-hardware businesses, but CAN be granted explicitly via allowed_addons when configured by admin.
      */
     public function test_adversarial_retail_under_no_circumstances_can_acquire_hardware_features(): void
     {
-        $matrix = [
-            'Retail Basic + Hardware Addons' => [
+        // 1. Without quotes/logistics in allowed_addons, they must be strictly false across non-hardware verticals
+        $defaultMatrix = [
+            'Retail Basic Default' => [
                 'business_type' => License::BUSINESS_RETAIL,
                 'plan' => License::PLAN_BASICO,
-                'allowed_addons' => ['quotes', 'logistics'],
+                'allowed_addons' => [],
             ],
-            'Retail Premium + Hardware Addons' => [
+            'Retail Premium Default' => [
                 'business_type' => License::BUSINESS_RETAIL,
                 'plan' => License::PLAN_PREMIUM,
-                'allowed_addons' => ['quotes', 'logistics'],
+                'allowed_addons' => [],
             ],
-            'Retail Basic + Full 17 Feature Injection' => [
+            'Retail Basic with General Addons' => [
                 'business_type' => License::BUSINESS_RETAIL,
                 'plan' => License::PLAN_BASICO,
-                'allowed_addons' => self::EXPECTED_FEATURES,
+                'allowed_addons' => ['suppliers', 'expenses', 'multi_caja'],
             ],
-            'Retail Premium + Full 17 Feature Injection' => [
-                'business_type' => License::BUSINESS_RETAIL,
-                'plan' => License::PLAN_PREMIUM,
-                'allowed_addons' => self::EXPECTED_FEATURES,
-            ],
-            'Arbitrary Vertical Gastronomy Basic + Hardware Addons' => [
+            'Gastronomy Basic Default' => [
                 'business_type' => 'restaurant_gastronomy',
                 'plan' => License::PLAN_BASICO,
-                'allowed_addons' => ['quotes', 'logistics'],
+                'allowed_addons' => [],
             ],
-            'Arbitrary Vertical Services Premium + Hardware Addons' => [
+            'Services Premium Default' => [
                 'business_type' => 'services_consulting',
                 'plan' => License::PLAN_PREMIUM,
-                'allowed_addons' => ['quotes', 'logistics'],
+                'allowed_addons' => [],
             ],
         ];
 
-        foreach ($matrix as $scenarioName => $config) {
+        foreach ($defaultMatrix as $scenarioName => $config) {
             $license = License::create([
                 'client_name' => "Adversarial Test - {$scenarioName}",
                 'business_type' => $config['business_type'],
@@ -321,11 +312,66 @@ class AdversarialPlanValidationTest extends TestCase
 
             $this->assertFalse(
                 $features['quotes'],
-                "Scenario [{$scenarioName}]: 'quotes' MUST BE FALSE for non-hardware businesses under any circumstance!"
+                "Scenario [{$scenarioName}]: 'quotes' must be false by default for non-hardware businesses"
             );
             $this->assertFalse(
                 $features['logistics'],
-                "Scenario [{$scenarioName}]: 'logistics' MUST BE FALSE for non-hardware businesses under any circumstance!"
+                "Scenario [{$scenarioName}]: 'logistics' must be false by default for non-hardware businesses"
+            );
+        }
+
+        // 2. When explicitly configured in allowed_addons by admin, they are granted
+        $explicitMatrix = [
+            'Retail Basic + Quotes' => [
+                'business_type' => License::BUSINESS_RETAIL,
+                'plan' => License::PLAN_BASICO,
+                'allowed_addons' => ['quotes'],
+                'expect_quotes' => true,
+                'expect_logistics' => false,
+            ],
+            'Retail Premium + Quotes and Logistics' => [
+                'business_type' => License::BUSINESS_RETAIL,
+                'plan' => License::PLAN_PREMIUM,
+                'allowed_addons' => ['quotes', 'logistics'],
+                'expect_quotes' => true,
+                'expect_logistics' => true,
+            ],
+            'Gastronomy Basic + Logistics' => [
+                'business_type' => 'restaurant_gastronomy',
+                'plan' => License::PLAN_BASICO,
+                'allowed_addons' => ['logistics'],
+                'expect_quotes' => false,
+                'expect_logistics' => true,
+            ],
+        ];
+
+        foreach ($explicitMatrix as $scenarioName => $config) {
+            $license = License::create([
+                'client_name' => "Adversarial Test - {$scenarioName}",
+                'business_type' => $config['business_type'],
+                'plan' => $config['plan'],
+                'plan_type' => License::TYPE_SAAS,
+                'is_active' => true,
+                'allowed_addons' => $config['allowed_addons'],
+            ]);
+
+            $response = $this->postJson('/api/validate', [
+                'license_key' => $license->api_key,
+                'installation_id' => 'adv-device-matrix-'.md5($scenarioName),
+            ]);
+
+            $response->assertStatus(200, "Scenario [{$scenarioName}] must return 200 OK");
+            $features = $response->json('features');
+
+            $this->assertSame(
+                $config['expect_quotes'],
+                $features['quotes'],
+                "Scenario [{$scenarioName}]: 'quotes' expectation failed"
+            );
+            $this->assertSame(
+                $config['expect_logistics'],
+                $features['logistics'],
+                "Scenario [{$scenarioName}]: 'logistics' expectation failed"
             );
         }
     }
@@ -380,7 +426,7 @@ class AdversarialPlanValidationTest extends TestCase
     /**
      * Challenge 4: Schema Invariance & Strict Typing
      * Every feature in the features dictionary must be strictly a boolean (not int, not string, not null).
-     * Every response must have exactly the 17 predefined keys.
+     * Every response must have exactly the 18 predefined keys.
      */
     public function test_adversarial_feature_dictionary_schema_and_types(): void
     {
@@ -411,7 +457,7 @@ class AdversarialPlanValidationTest extends TestCase
             $features = $response->json('features');
 
             $this->assertIsArray($features);
-            $this->assertCount(17, $features, "Test case {$name} did not contain exactly 17 feature keys");
+            $this->assertCount(18, $features, "Test case {$name} did not contain exactly 18 feature keys");
 
             foreach (self::EXPECTED_FEATURES as $expectedKey) {
                 $this->assertArrayHasKey($expectedKey, $features, "Missing key {$expectedKey} in {$name}");

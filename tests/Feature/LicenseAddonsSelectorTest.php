@@ -18,12 +18,13 @@ class LicenseAddonsSelectorTest extends TestCase
 {
     use RefreshDatabase;
 
-    private const PHASE_FLAGS = ['multi_rubro', 'mercadopago_qr', 'arca_afip'];
+    private const PHASE_FLAGS = ['multi_rubro', 'ecommerce_sync'];
 
-    /** Flags emitidos por LicenseValidationController::mapFeatures. */
+    /** Flags emitidos por LicenseValidationController::mapFeatures exclusivos de Premium. */
     private const ALL_PREMIUM_ADDONS = [
-        'multi_caja', 'current_accounts', 'advanced_reports', 'predictive_alerts', 'checks',
-        'suppliers', 'expenses', 'multi_rubro', 'mercadopago_qr', 'arca_afip', 'multiple_prices',
+        'multi_caja', 'predictive_alerts', 'checks',
+        'suppliers', 'expenses', 'multi_rubro', 'multiple_prices',
+        'ecommerce_sync',
     ];
 
     private function validate(License $license, string $device = 'device-addons-001')
@@ -53,9 +54,8 @@ class LicenseAddonsSelectorTest extends TestCase
     {
         return [
             'multi_rubro'    => ['multi_rubro'],
-            'mercadopago_qr' => ['mercadopago_qr'],
-            'arca_afip'      => ['arca_afip'],
             'suppliers'      => ['suppliers'],
+            'ecommerce_sync' => ['ecommerce_sync'],
         ];
     }
 
@@ -120,8 +120,9 @@ class LicenseAddonsSelectorTest extends TestCase
         $features = $this->validate($license->fresh())->json('features');
 
         $this->assertTrue($features['multi_rubro'], 'El extra pagado debe mantenerse al volver a Básico');
-        $this->assertFalse($features['mercadopago_qr']);
-        $this->assertFalse($features['arca_afip']);
+        $this->assertTrue($features['mercadopago_qr'], 'mercadopago_qr es base y se mantiene');
+        $this->assertTrue($features['arca_afip'], 'arca_afip es base y se mantiene');
+        $this->assertFalse($features['ecommerce_sync'], 'ecommerce_sync no está en addons y debe ser false en básico');
     }
 
     public function test_filament_form_allows_saving_basic_license_with_phase_flags(): void
@@ -186,6 +187,7 @@ class LicenseAddonsSelectorTest extends TestCase
             'fast_pos', 'z_reports', 'quotes', 'current_accounts', 'multiple_prices', 'multi_caja',
             'mobile_app', 'remote_access', 'advanced_reports', 'predictive_alerts', 'logistics',
             'checks', 'suppliers', 'expenses', 'multi_rubro', 'mercadopago_qr', 'arca_afip',
+            'ecommerce_sync',
         ];
 
         Livewire::test(CreateLicense::class)

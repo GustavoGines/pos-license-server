@@ -38,3 +38,7 @@ Estas reglas definen el comportamiento fundamental y de por vida del agente (Ant
     2.  **Último Hito:** Breve resumen de lo último que funcionó o se modificó.
     3.  **Siguiente Paso Inmediato:** Lo que se debe hacer a continuación (Next Action).
     4.  **Decisiones Técnicas Activas:** Contexto técnico vital a recordar para no volver a cometer los mismos errores.
+
+## 6. Generación de Código y Uso de Scripts
+*   **Análisis Humano-like:** NO utilizar scripts automatizados de reemplazo masivo o subagentes (teamwork/scripts) para generar o inyectar código si el usuario expresa disgusto por ellos. El agente debe analizar, entender y escribir/modificar el código directamente de forma responsable y artesanal.
+*   **Codificación (Encoding):** Al escribir o modificar archivos (especialmente usando PowerShell o herramientas nativas), asegurarse SIEMPRE de usar codificación **UTF-8** pura para no corromper caracteres especiales (ñ, tildes, símbolos, emojis). Nunca guardar como ANSI o UTF-16.
