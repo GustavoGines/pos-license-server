@@ -42,28 +42,28 @@ class PlanValidationTest extends TestCase
 
         $features = $response->json('features');
 
-        // Base features: MUST be true
+        // Base features: MUST be true (oferta comercial: incluye MP QR, AFIP, CC, reportes y app móvil)
         $this->assertTrue($features['fast_pos'], 'fast_pos must be true in basic plan');
         $this->assertTrue($features['z_reports'], 'z_reports must be true in basic plan');
+        $this->assertTrue($features['current_accounts'], 'current_accounts must be true in basic plan');
+        $this->assertTrue($features['advanced_reports'], 'advanced_reports must be true in basic plan');
+        $this->assertTrue($features['mercadopago_qr'], 'mercadopago_qr must be true in basic plan');
+        $this->assertTrue($features['arca_afip'], 'arca_afip must be true in basic plan');
+        $this->assertTrue($features['mobile_app'], 'mobile_app must be true in basic plan');
 
         // Premium features: MUST be false
         $this->assertFalse($features['multi_caja'], 'multi_caja must be false in basic plan');
-        $this->assertFalse($features['current_accounts'], 'current_accounts must be false in basic plan');
         $this->assertFalse($features['multiple_prices'], 'multiple_prices must be false in basic plan');
-        $this->assertFalse($features['advanced_reports'], 'advanced_reports must be false in basic plan');
         $this->assertFalse($features['predictive_alerts'], 'predictive_alerts must be false in basic plan');
         $this->assertFalse($features['checks'], 'checks must be false in basic plan');
         $this->assertFalse($features['suppliers'], 'suppliers must be false in basic plan');
         $this->assertFalse($features['expenses'], 'expenses must be false in basic plan');
         $this->assertFalse($features['multi_rubro'], 'multi_rubro must be false in basic plan');
-        $this->assertFalse($features['mercadopago_qr'], 'mercadopago_qr must be false in basic plan');
-        $this->assertFalse($features['arca_afip'], 'arca_afip must be false in basic plan');
         $this->assertFalse($features['ecommerce_sync'], 'ecommerce_sync must be false in basic plan');
 
         // Vertical & Addon features: MUST be false
         $this->assertFalse($features['quotes'], 'quotes must be false for retail basic');
         $this->assertFalse($features['logistics'], 'logistics must be false for retail basic');
-        $this->assertFalse($features['mobile_app'], 'mobile_app must be false when not in addons');
         $this->assertFalse($features['remote_access'], 'remote_access must be false when not in addons');
     }
 
@@ -121,8 +121,8 @@ class PlanValidationTest extends TestCase
         $this->assertFalse($features['quotes'], 'quotes must be false in retail even if premium');
         $this->assertFalse($features['logistics'], 'logistics must be false in retail even if premium');
 
-        // Addon-only features: MUST be false if not specifically granted
-        $this->assertFalse($features['mobile_app'], 'mobile_app must be false without addon grant');
+        // Base & Addon features
+        $this->assertTrue($features['mobile_app'], 'mobile_app is included in all plans (base feature)');
         $this->assertFalse($features['remote_access'], 'remote_access must be false without addon grant');
     }
 
@@ -159,21 +159,22 @@ class PlanValidationTest extends TestCase
         // Base features: MUST remain true
         $this->assertTrue($features['fast_pos']);
         $this->assertTrue($features['z_reports']);
+        $this->assertTrue($features['current_accounts']);
+        $this->assertTrue($features['advanced_reports']);
+        $this->assertTrue($features['mercadopago_qr']);
+        $this->assertTrue($features['arca_afip']);
+        $this->assertTrue($features['mobile_app']);
 
         // Overridden module: MUST evaluate to true
         $this->assertTrue($features['suppliers'], 'features.suppliers must be true via allowed_addons override');
 
         // Other premium modules: MUST remain false
         $this->assertFalse($features['multi_caja']);
-        $this->assertFalse($features['current_accounts']);
-        $this->assertFalse($features['advanced_reports']);
         $this->assertFalse($features['predictive_alerts']);
         $this->assertFalse($features['checks']);
         $this->assertFalse($features['expenses']);
         $this->assertFalse($features['multiple_prices']);
         $this->assertFalse($features['multi_rubro']);
-        $this->assertFalse($features['mercadopago_qr']);
-        $this->assertFalse($features['arca_afip']);
         $this->assertFalse($features['ecommerce_sync']);
     }
 
@@ -209,16 +210,35 @@ class PlanValidationTest extends TestCase
     }
 
     /**
-     * Test 5: Vertical restriction enforcement
-     * Asserts that for retail businesses, vertical-exclusive features ('quotes' and 'logistics')
-     * are strictly forced to false even if manually placed in allowed_addons.
-     * In contrast, a hardware_store business has them enabled.
+     * Test 5: Vertical restriction and allowed_addons enablement
+     * Asserts that retail businesses do not receive quotes/logistics by default.
+     * When explicitly granted via allowed_addons, they ARE enabled.
+     * In contrast, a hardware_store business has them enabled natively.
      */
-    public function test_vertical_restriction_enforcement_blocks_quotes_and_logistics_on_retail(): void
+    public function test_vertical_restriction_and_allowed_addons_for_retail(): void
     {
-        // 5a. Retail business attempting to inject hardware-exclusive addons
-        $retailLicense = License::create([
-            'client_name' => 'Comercio Retail Con Addons Ferretería',
+        // 5a. Retail business without extra addons: quotes and logistics are false by default
+        $retailDefault = License::create([
+            'client_name' => 'Comercio Retail Por Defecto',
+            'business_type' => License::BUSINESS_RETAIL,
+            'plan' => License::PLAN_BASICO,
+            'plan_type' => License::TYPE_SAAS,
+            'is_active' => true,
+            'allowed_addons' => [],
+        ]);
+
+        $resDefault = $this->postJson('/api/validate', [
+            'license_key' => $retailDefault->api_key,
+            'installation_id' => 'device-retail-default-001',
+        ]);
+        $resDefault->assertStatus(200);
+        $featuresDefault = $resDefault->json('features');
+        $this->assertFalse($featuresDefault['quotes'], 'quotes must be false by default on retail');
+        $this->assertFalse($featuresDefault['logistics'], 'logistics must be false by default on retail');
+
+        // 5b. Retail business with quotes and logistics in allowed_addons: MUST be enabled
+        $retailWithAddons = License::create([
+            'client_name' => 'Comercio Retail Con Addons Habilitados',
             'business_type' => License::BUSINESS_RETAIL,
             'plan' => License::PLAN_BASICO,
             'plan_type' => License::TYPE_SAAS,
@@ -226,19 +246,16 @@ class PlanValidationTest extends TestCase
             'allowed_addons' => ['quotes', 'logistics'],
         ]);
 
-        $retailResponse = $this->postJson('/api/validate', [
-            'license_key' => $retailLicense->api_key,
-            'installation_id' => 'device-retail-vertical-001',
+        $resWithAddons = $this->postJson('/api/validate', [
+            'license_key' => $retailWithAddons->api_key,
+            'installation_id' => 'device-retail-addons-001',
         ]);
+        $resWithAddons->assertStatus(200);
+        $featuresWithAddons = $resWithAddons->json('features');
+        $this->assertTrue($featuresWithAddons['quotes'], 'quotes must be true on retail when explicitly in allowed_addons');
+        $this->assertTrue($featuresWithAddons['logistics'], 'logistics must be true on retail when explicitly in allowed_addons');
 
-        $retailResponse->assertStatus(200);
-        $retailFeatures = $retailResponse->json('features');
-
-        // Vertical exclusivity must strictly block these on retail
-        $this->assertFalse($retailFeatures['quotes'], 'quotes must be forced to false on retail even if present in allowed_addons');
-        $this->assertFalse($retailFeatures['logistics'], 'logistics must be forced to false on retail even if present in allowed_addons');
-
-        // 5b. Hardware store business: quotes and logistics are enabled natively
+        // 5c. Hardware store business: quotes and logistics are enabled natively
         $hardwareLicense = License::create([
             'client_name' => 'Ferretería Industrial',
             'business_type' => License::BUSINESS_HARDWARE,
@@ -256,8 +273,8 @@ class PlanValidationTest extends TestCase
         $hardwareResponse->assertStatus(200);
         $hardwareFeatures = $hardwareResponse->json('features');
 
-        $this->assertTrue($hardwareFeatures['quotes'], 'quotes must be true for hardware_store business');
-        $this->assertTrue($hardwareFeatures['logistics'], 'logistics must be true for hardware_store business');
+        $this->assertTrue($hardwareFeatures['quotes'], 'quotes must be true for hardware_store business natively');
+        $this->assertTrue($hardwareFeatures['logistics'], 'logistics must be true for hardware_store business natively');
     }
 
     /**

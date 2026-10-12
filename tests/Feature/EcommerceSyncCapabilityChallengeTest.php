@@ -149,12 +149,16 @@ class EcommerceSyncCapabilityChallengeTest extends TestCase
         $this->assertArrayHasKey('ecommerce_sync', $features);
         $this->assertSame(true, $features['ecommerce_sync'], 'ecommerce_sync must be strictly boolean true via allowed_addons override');
 
+        // Base features are true
+        $this->assertSame(true, $features['current_accounts']);
+        $this->assertSame(true, $features['mercadopago_qr']);
+        $this->assertSame(true, $features['arca_afip']);
+
         // Other premium addons must remain false
         $this->assertSame(false, $features['multi_caja']);
-        $this->assertSame(false, $features['current_accounts']);
-        $this->assertSame(false, $features['mercadopago_qr']);
-        $this->assertSame(false, $features['arca_afip']);
         $this->assertSame(false, $features['suppliers']);
+        $this->assertSame(false, $features['expenses']);
+        $this->assertSame(false, $features['multi_rubro']);
 
         // Features count must be exactly 18
         $this->assertCount(18, $features);

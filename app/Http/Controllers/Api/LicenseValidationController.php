@@ -57,28 +57,46 @@ class LicenseValidationController extends Controller
 
         $businessAddons = [];
 
-        // Módulos Base: siempre disponibles
-        array_push($businessAddons, 'fast_pos', 'z_reports');
+        // 1. Módulos Base: siempre disponibles en todos los planes (Básico y Premium)
+        array_push(
+            $businessAddons,
+            'fast_pos',
+            'z_reports',
+            'current_accounts',
+            'advanced_reports',
+            'mercadopago_qr',
+            'arca_afip',
+            'mobile_app'
+        );
 
-        // 2. Módulos por Plan (Premium para Retail y Ferretería)
+        // 2. Módulos por Plan Premium (disponibles para TODOS los rubros con plan premium)
         if (in_array($license->plan, ['premium', 'pro', 'enterprise'])) {
-            array_push($businessAddons, 'multi_caja', 'current_accounts', 'advanced_reports', 'predictive_alerts', 'checks', 'suppliers', 'expenses', 'multi_rubro', 'mercadopago_qr', 'arca_afip', 'ecommerce_sync');
+            array_push(
+                $businessAddons,
+                'multi_caja',
+                'predictive_alerts',
+                'checks',
+                'suppliers',
+                'expenses',
+                'multi_rubro',
+                'ecommerce_sync'
+            );
         }
 
-        // 3. Módulos por Plan Premium (disponibles para TODOS los rubros con plan premium)
-        // multiple_prices está disponible para Retail Premium y Ferretería Premium.
-        if (in_array($license->plan, ['premium', 'pro', 'enterprise'])) {
+        // 3. Múltiples listas de precios:
+        // - Incluido en plan Premium (cualquier rubro)
+        // - Incluido en Ferretería / Corralón (cualquier plan, incluso Básico)
+        if (in_array($license->plan, ['premium', 'pro', 'enterprise']) || $license->business_type === License::BUSINESS_HARDWARE) {
             array_push($businessAddons, 'multiple_prices');
         }
 
-        // 4. Módulos Exclusivos por Vertical / Rubro (sin importar el plan)
-        // quotes y logistics son funcionalidades propias del flujo de Ferretería/Corralon.
-        // Retail no los usa aunque tenga plan Premium.
-        if ($license->business_type === 'hardware_store') {
+        // 4. Módulos Nativos por Vertical / Rubro:
+        // quotes y logistics son nativos del flujo de Ferretería/Corralón en cualquier plan.
+        if ($license->business_type === License::BUSINESS_HARDWARE) {
             array_push($businessAddons, 'quotes', 'logistics');
         }
 
-        // Módulos extra/individuales pagados por el cliente (ej: reportes_gerenciales para un plan Básico)
+        // Módulos extra/individuales pagados por el cliente (ej: quotes para un plan Retail)
         // La actualización de plan no borrará los módulos extra que un cliente ya haya pagado.
         $adminAddons = is_array($license->allowed_addons) ? $license->allowed_addons : [];
         $addons = array_values(array_unique(array_merge($businessAddons, $adminAddons)));
@@ -132,19 +150,20 @@ class LicenseValidationController extends Controller
         foreach ($allFeatures as $feature) {
             $hasAddon = in_array($feature, $addons);
 
-            // Exclusividad estricta por Rubro para ciertos módulos (Ferretería)
-            // Esto anula cualquier selección errónea en allowed_addons si se cambia a Retail
+            // Respetar estrictamente los módulos individuales que el cliente/administrador haya habilitado específicamente
+            if (in_array($feature, $adminAddons)) {
+                $map[$feature] = true;
+                continue;
+            }
+
+            // Exclusividad nativa por Rubro:
+            // quotes y logistics son automáticos solo para Ferretería.
+            // Para Retail son false por defecto a menos que se hayan asignado en allowed_addons (evaluado arriba).
             if (in_array($feature, ['logistics', 'quotes'])) {
                 if (!$isHardwareStore) {
                     $map[$feature] = false;
                     continue;
                 }
-            }
-
-            // Respetar estrictamente los módulos individuales que el cliente haya adquirido
-            if (in_array($feature, $adminAddons)) {
-                $map[$feature] = true;
-                continue;
             }
 
             $map[$feature] = $hasAddon;
