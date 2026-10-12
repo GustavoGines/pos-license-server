@@ -42,16 +42,16 @@ class PlanValidationTest extends TestCase
 
         $features = $response->json('features');
 
-        // Base features: MUST be true (oferta comercial: incluye MP QR, AFIP, CC, reportes y app móvil)
+        // Base features: MUST be true (oferta comercial: incluye MP QR, AFIP, reportes y app móvil)
         $this->assertTrue($features['fast_pos'], 'fast_pos must be true in basic plan');
         $this->assertTrue($features['z_reports'], 'z_reports must be true in basic plan');
-        $this->assertTrue($features['current_accounts'], 'current_accounts must be true in basic plan');
         $this->assertTrue($features['advanced_reports'], 'advanced_reports must be true in basic plan');
         $this->assertTrue($features['mercadopago_qr'], 'mercadopago_qr must be true in basic plan');
         $this->assertTrue($features['arca_afip'], 'arca_afip must be true in basic plan');
         $this->assertTrue($features['mobile_app'], 'mobile_app must be true in basic plan');
 
-        // Premium features: MUST be false
+        // Premium features: MUST be false (current_accounts ahora es Premium o Addon)
+        $this->assertFalse($features['current_accounts'], 'current_accounts must be false in basic plan');
         $this->assertFalse($features['multi_caja'], 'multi_caja must be false in basic plan');
         $this->assertFalse($features['multiple_prices'], 'multiple_prices must be false in basic plan');
         $this->assertFalse($features['predictive_alerts'], 'predictive_alerts must be false in basic plan');
@@ -159,7 +159,6 @@ class PlanValidationTest extends TestCase
         // Base features: MUST remain true
         $this->assertTrue($features['fast_pos']);
         $this->assertTrue($features['z_reports']);
-        $this->assertTrue($features['current_accounts']);
         $this->assertTrue($features['advanced_reports']);
         $this->assertTrue($features['mercadopago_qr']);
         $this->assertTrue($features['arca_afip']);
@@ -169,6 +168,7 @@ class PlanValidationTest extends TestCase
         $this->assertTrue($features['suppliers'], 'features.suppliers must be true via allowed_addons override');
 
         // Other premium modules: MUST remain false
+        $this->assertFalse($features['current_accounts']);
         $this->assertFalse($features['multi_caja']);
         $this->assertFalse($features['predictive_alerts']);
         $this->assertFalse($features['checks']);
