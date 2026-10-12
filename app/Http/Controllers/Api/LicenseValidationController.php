@@ -62,7 +62,6 @@ class LicenseValidationController extends Controller
             $businessAddons,
             'fast_pos',
             'z_reports',
-            'current_accounts',
             'advanced_reports',
             'mercadopago_qr',
             'arca_afip',
@@ -73,6 +72,7 @@ class LicenseValidationController extends Controller
         if (in_array($license->plan, ['premium', 'pro', 'enterprise'])) {
             array_push(
                 $businessAddons,
+                'current_accounts',
                 'multi_caja',
                 'predictive_alerts',
                 'checks',

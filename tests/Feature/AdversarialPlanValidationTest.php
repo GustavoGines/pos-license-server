@@ -67,7 +67,6 @@ class AdversarialPlanValidationTest extends TestCase
         // 1. Base features must be true
         $this->assertTrue($features['fast_pos']);
         $this->assertTrue($features['z_reports']);
-        $this->assertTrue($features['current_accounts']);
         $this->assertTrue($features['advanced_reports']);
         $this->assertTrue($features['mercadopago_qr']);
         $this->assertTrue($features['arca_afip']);
@@ -79,6 +78,7 @@ class AdversarialPlanValidationTest extends TestCase
         $this->assertTrue($features['multiple_prices'], 'multiple_prices must be active via concurrent override');
 
         // 3. All other premium features must remain strictly false
+        $this->assertFalse($features['current_accounts']);
         $this->assertFalse($features['multi_caja']);
         $this->assertFalse($features['predictive_alerts']);
         $this->assertFalse($features['checks']);
