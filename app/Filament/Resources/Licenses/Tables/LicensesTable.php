@@ -95,6 +95,27 @@ class LicensesTable
                 TextColumn::make('allowed_addons')
                     ->label('Módulos')
                     ->badge()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'fast_pos'          => '⚡ Caja Rápida',
+                        'z_reports'         => '🧾 Reportes Z',
+                        'quotes'            => '📝 Presupuestos',
+                        'current_accounts'  => '📘 Cuentas Corrientes',
+                        'multiple_prices'   => '🏷️ Listas de Precios',
+                        'multi_caja'        => '🖥️ Múltiples Cajas',
+                        'mobile_app'        => '📱 App Móvil',
+                        'remote_access'     => '🌐 Acceso Remoto',
+                        'advanced_reports'  => '📊 Reportes Gerenciales',
+                        'predictive_alerts' => '🧠 Alertas Predictivas',
+                        'logistics'         => '🚚 Logística y Remitos',
+                        'checks'            => '💵 Gestión de Cheques',
+                        'suppliers'         => '📦 Gestión de Proveedores',
+                        'expenses'          => '💸 Gestión de Gastos',
+                        'multi_rubro'       => '🗂️ Multi-Rubro',
+                        'mercadopago_qr'    => '📲 Mercado Pago QR',
+                        'arca_afip'         => '🧾 Facturación AFIP',
+                        'ecommerce_sync'    => '🛒 E-Commerce Sync',
+                        default             => $state,
+                    })
                     ->searchable()
                     ->toggleable(),
 
