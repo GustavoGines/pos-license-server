@@ -79,7 +79,8 @@ class LicenseValidationController extends Controller
                 'suppliers',
                 'expenses',
                 'multi_rubro',
-                'ecommerce_sync'
+                'ecommerce_sync',
+                'quotes'
             );
         }
 
@@ -96,7 +97,7 @@ class LicenseValidationController extends Controller
             array_push($businessAddons, 'quotes', 'logistics');
         }
 
-        // Módulos extra/individuales pagados por el cliente (ej: quotes para un plan Retail)
+        // Módulos extra/individuales pagados por el cliente (ej: logistics para un plan Retail)
         // La actualización de plan no borrará los módulos extra que un cliente ya haya pagado.
         $adminAddons = is_array($license->allowed_addons) ? $license->allowed_addons : [];
         $addons = array_values(array_unique(array_merge($businessAddons, $adminAddons)));
@@ -157,9 +158,9 @@ class LicenseValidationController extends Controller
             }
 
             // Exclusividad nativa por Rubro:
-            // quotes y logistics son automáticos solo para Ferretería.
-            // Para Retail son false por defecto a menos que se hayan asignado en allowed_addons (evaluado arriba).
-            if (in_array($feature, ['logistics', 'quotes'])) {
+            // logistics es automático solo para Ferretería.
+            // Para Retail es false por defecto a menos que se haya asignado en allowed_addons (evaluado arriba).
+            if ($feature === 'logistics') {
                 if (!$isHardwareStore) {
                     $map[$feature] = false;
                     continue;

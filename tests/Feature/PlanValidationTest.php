@@ -117,8 +117,8 @@ class PlanValidationTest extends TestCase
         $this->assertTrue($features['arca_afip'], 'arca_afip must be true in premium plan (Phase 0/1)');
         $this->assertTrue($features['ecommerce_sync'], 'ecommerce_sync must be true in premium plan (Phase 6)');
 
-        // Hardware store exclusive features: MUST be false in Retail vertical
-        $this->assertFalse($features['quotes'], 'quotes must be false in retail even if premium');
+        // Quotes is included in premium plan for all verticals; logistics remains exclusive to hardware
+        $this->assertTrue($features['quotes'], 'quotes must be true in retail premium plan');
         $this->assertFalse($features['logistics'], 'logistics must be false in retail even if premium');
 
         // Base & Addon features
