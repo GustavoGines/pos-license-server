@@ -310,10 +310,18 @@ class AdversarialPlanValidationTest extends TestCase
             $response->assertStatus(200, "Scenario [{$scenarioName}] must return 200 OK");
             $features = $response->json('features');
 
-            $this->assertFalse(
-                $features['quotes'],
-                "Scenario [{$scenarioName}]: 'quotes' must be false by default for non-hardware businesses"
-            );
+            $isPremium = in_array($config['plan'], [License::PLAN_PREMIUM, 'pro', 'enterprise']);
+            if ($isPremium) {
+                $this->assertTrue(
+                    $features['quotes'],
+                    "Scenario [{$scenarioName}]: 'quotes' is included in premium plans"
+                );
+            } else {
+                $this->assertFalse(
+                    $features['quotes'],
+                    "Scenario [{$scenarioName}]: 'quotes' must be false by default for basic non-hardware businesses"
+                );
+            }
             $this->assertFalse(
                 $features['logistics'],
                 "Scenario [{$scenarioName}]: 'logistics' must be false by default for non-hardware businesses"
