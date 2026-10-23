@@ -163,22 +163,18 @@ class Challenger2AdversarialTest extends TestCase
 
         $license->refresh();
 
-        // BUG DISCOVERY / EMPIRICAL PROOF:
-        // In LicenseValidationController.php line 48:
-        // empty($license->installation_id) is evaluated.
-        // In PHP, empty("0") === true!
-        // Therefore, Device 2 (intruder) is NOT rejected with 403.
-        // Instead, the check treats $license->installation_id as empty, overwrites it,
-        // and returns 200 OK!
+        // L-07 REMEDIADO: Ahora installation_id = "0" NO es considerado vacío.
+        // El segundo dispositivo ("intruder-device-999") debe ser rechazado con 403 Forbidden
+        // y el installation_id original ("0") debe preservarse intacto.
         $this->assertEquals(
-            200,
+            403,
             $res2->status(),
-            'EMPIRICAL DEFECT CONFIRMED: empty("0") evaluates to true, so intruder is granted 200 instead of 403 Forbidden!'
+            'L-07 FIXED: installation_id "0" must lock the license and reject intruder with 403 Forbidden!'
         );
         $this->assertEquals(
-            'intruder-device-999',
+            '0',
             $license->installation_id,
-            'EMPIRICAL DEFECT CONFIRMED: License installation_id was overwritten by intruder because empty("0") is truthy!'
+            'L-07 FIXED: License installation_id "0" must not be overwritten by intruder!'
         );
     }
 
@@ -260,7 +256,7 @@ class Challenger2AdversarialTest extends TestCase
 
     /**
      * Probe 2d: Concurrency simulation / Race condition on initial hardware locking.
-     * Demonstrates lack of atomic lock/database transaction on binding.
+     * Verifies that conditional atomic update (whereNull / where '') prevents overwriting.
      */
     public function test_probe_2d_drm_concurrency_race_condition(): void
     {
@@ -274,28 +270,88 @@ class Challenger2AdversarialTest extends TestCase
             'allowed_addons' => [],
         ]);
 
-        // Terminal A and Terminal B query simultaneously before either has saved:
-        // Simulate two instances of the License model loaded concurrently in memory:
-        $instanceA = License::where('api_key', $license->api_key)->first();
-        $instanceB = License::where('api_key', $license->api_key)->first();
+        // Terminal B binds first via the API
+        $resB = $this->postJson('/api/validate', [
+            'license_key' => $license->api_key,
+            'installation_id' => 'terminal-bravo-first-save',
+        ]);
+        $resB->assertStatus(200);
 
-        $this->assertNull($instanceA->installation_id);
-        $this->assertNull($instanceB->installation_id);
+        // Terminal A attempts to bind afterwards and is rejected atomically with 403
+        $resA = $this->postJson('/api/validate', [
+            'license_key' => $license->api_key,
+            'installation_id' => 'terminal-alpha-last-save-overwrites',
+        ]);
+        $resA->assertStatus(403);
 
-        // Instance B binds first
-        $instanceB->installation_id = 'terminal-bravo-first-save';
-        $instanceB->save();
-
-        // Instance A was already past the empty() check in a concurrent worker, so it saves:
-        $instanceA->installation_id = 'terminal-alpha-last-save-overwrites';
-        $instanceA->save();
-
-        // The database now has Terminal Alpha's ID, silently overwriting Terminal Bravo
         $license->refresh();
         $this->assertEquals(
-            'terminal-alpha-last-save-overwrites',
+            'terminal-bravo-first-save',
             $license->installation_id,
-            'Without pessimistic locking (lockForUpdate) or unique constraints, the last write silently overwrites initial binding'
+            'Atomic update and pessimistic locking preserve the first bound terminal'
         );
+    }
+
+    /**
+     * Probe 3: L-01, L-08, L-14, L-17 Verification (expires_at, nonce, cryptographic signature & release sha256).
+     */
+    public function test_probe_3_validation_includes_expires_at_nonce_and_signature_and_release_sha256(): void
+    {
+        Config::set('app.license_signing_secret', 'test-signing-secret-key-2026');
+        $expDate = now()->addDays(30)->format('Y-m-d');
+
+        $license = License::create([
+            'client_name' => 'Comercio Firma Criptográfica',
+            'business_type' => License::BUSINESS_RETAIL,
+            'plan' => License::PLAN_PREMIUM,
+            'plan_type' => License::TYPE_SAAS,
+            'is_active' => true,
+            'expiration_date' => $expDate,
+            'allowed_addons' => [],
+        ]);
+
+        $response = $this->postJson('/api/validate', [
+            'license_key' => $license->api_key,
+            'installation_id' => 'device-signed-001',
+            'nonce' => 'nonce-challenge-xyz-987',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'status',
+                'plan',
+                'plan_type',
+                'server_time',
+                'expires_at',
+                'client_name',
+                'business_type',
+                'plan_espanol',
+                'features',
+                'nonce',
+                'signature',
+            ]);
+
+        $this->assertNotNull($response->json('expires_at'), 'expires_at must be included in validation response (L-08)');
+        $this->assertStringStartsWith($expDate, $response->json('expires_at'));
+        $this->assertSame('nonce-challenge-xyz-987', $response->json('nonce'));
+        $this->assertSame(64, strlen((string) $response->json('signature')));
+
+        // L-14: Release SHA-256 support (optional for backwards compatibility, validated when present)
+        Config::set('app.ci_deploy_token', 'ci-secret-token');
+        $validSha = str_repeat('a', 64);
+
+        $this->postJson('/api/releases/new', [
+            'version' => 'v3.1.0',
+            'component' => 'frontend',
+            'channel' => 'stable',
+            'download_url' => 'https://example.com/update_v3.1.0.zip',
+            'sha256' => $validSha,
+            'changelog' => 'Signed release',
+            'token' => 'ci-secret-token',
+        ])->assertStatus(201);
+
+        $checkRes = $this->getJson('/api/check-update?component=frontend&current_version=3.0.0&channel=stable');
+        $checkRes->assertStatus(200)
+            ->assertJsonPath('data.sha256', $validSha);
     }
 }

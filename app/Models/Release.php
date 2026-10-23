@@ -10,6 +10,7 @@ class Release extends Model
         'version',
         'component',
         'download_url',
+        'sha256',
         'changelog',
         'is_critical',
         'channel',

@@ -74,6 +74,14 @@ class ReleaseResource extends Resource
                 ->maxLength(500)
                 ->columnSpanFull(),
 
+            TextInput::make('sha256')
+                ->label('Checksum SHA-256 (Opcional)')
+                ->placeholder('Hash hexadecimal de 64 caracteres para verificar integridad del binario')
+                ->nullable()
+                ->maxLength(64)
+                ->rule('regex:/^[a-fA-F0-9]{64}$/')
+                ->columnSpanFull(),
+
             // ── Campo clave: Changelog editable manualmente por el Release Manager ──
             Textarea::make('changelog')
                 ->label('📝 Novedades (Changelog para el cliente)')

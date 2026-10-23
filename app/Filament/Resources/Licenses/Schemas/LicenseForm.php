@@ -63,9 +63,9 @@ class LicenseForm
 
                 TextInput::make('installation_id')
                     ->label('Installation ID')
-                    ->disabled()
-                    ->dehydrated(false)
-                    ->helperText('Se vincula automáticamente cuando el cliente activa la licencia por primera vez.')
+                    ->nullable()
+                    ->maxLength(255)
+                    ->helperText('Se vincula automáticamente al activar. Borrá este campo y guardá para liberar la licencia si el cliente cambió de PC.')
                     ->columnSpanFull(),
 
                 Select::make('allowed_addons')
