@@ -53,6 +53,7 @@ class ReleaseController extends Controller
             'data'             => $updateAvailable ? [
                 'version'      => $serverVersion,           // Devolvemos sin "v" para que Flutter compare limpio
                 'download_url' => $latestRelease->download_url,
+                'sha256'       => $latestRelease->sha256,
                 'changelog'    => $latestRelease->changelog,
                 'is_critical'  => (bool) $latestRelease->is_critical,
                 'released_at'  => $latestRelease->created_at->toISOString(),
@@ -90,6 +91,7 @@ class ReleaseController extends Controller
             'version'      => 'required|string|max:20',
             'component'    => 'nullable|string|max:50',
             'download_url' => 'required|url|max:500',
+            'sha256'       => ['nullable', 'string', 'regex:/^[a-fA-F0-9]{64}$/'],
             'changelog'    => 'nullable|string',
             'is_critical'  => 'nullable|boolean',
             'channel'      => 'nullable|string|max:20',
@@ -100,6 +102,7 @@ class ReleaseController extends Controller
             'version'      => $validated['version'],
             'component'    => $validated['component'] ?? 'frontend',
             'download_url' => $validated['download_url'],
+            'sha256'       => isset($validated['sha256']) ? strtolower($validated['sha256']) : null,
             'changelog'    => $validated['changelog'] ?? "Release {$validated['version']}.",
             'is_critical'  => $validated['is_critical'] ?? false,
             'channel'      => $validated['channel'] ?? 'beta', // CI/CD deployments are beta by default

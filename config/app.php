@@ -67,6 +67,8 @@ return [
 
     'ci_deploy_token' => env('CI_DEPLOY_TOKEN'),
 
+    'license_signing_secret' => env('LICENSE_SIGNING_SECRET'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

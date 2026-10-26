@@ -59,13 +59,15 @@ class LicenseForm
                     ->label('Fecha de Expiración')
                     ->required(fn (callable $get) => $get('plan_type') === 'saas')
                     ->hidden(fn (callable $get) => $get('plan_type') === 'lifetime')
+                    ->dehydrated(true)
+                    ->dehydrateStateUsing(fn ($state, callable $get) => $get('plan_type') === 'lifetime' ? null : $state)
                     ->nullable(),
 
                 TextInput::make('installation_id')
                     ->label('Installation ID')
-                    ->disabled()
-                    ->dehydrated(false)
-                    ->helperText('Se vincula automáticamente cuando el cliente activa la licencia por primera vez.')
+                    ->nullable()
+                    ->maxLength(255)
+                    ->helperText('Se vincula automáticamente al activar. Borrá este campo y guardá para liberar la licencia si el cliente cambió de PC.')
                     ->columnSpanFull(),
 
                 Select::make('allowed_addons')

@@ -310,7 +310,7 @@ class AdversarialPlanValidationTest extends TestCase
             $response->assertStatus(200, "Scenario [{$scenarioName}] must return 200 OK");
             $features = $response->json('features');
 
-            $isPremium = in_array($config['plan'], [License::PLAN_PREMIUM, 'pro', 'enterprise']);
+            $isPremium = ($config['plan'] === License::PLAN_PREMIUM);
             if ($isPremium) {
                 $this->assertTrue(
                     $features['quotes'],

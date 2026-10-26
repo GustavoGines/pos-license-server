@@ -10,10 +10,13 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 // Endpoint nuevo con protección anti-piratería por installation_id
-Route::post('/validate', [LicenseValidationController::class, 'validateKey']);
+Route::post('/validate', [LicenseValidationController::class, 'validateKey'])
+    ->middleware('throttle:60,1');
 
 // Endpoint para consultar actualizaciones (Público)
-Route::get('/check-update', [ReleaseController::class, 'checkUpdate']);
+Route::get('/check-update', [ReleaseController::class, 'checkUpdate'])
+    ->middleware('throttle:60,1');
 
 // Endpoint para que el CI/CD registre un nuevo release (Protegido por token secreto)
-Route::post('/releases/new', [ReleaseController::class, 'store']);
+Route::post('/releases/new', [ReleaseController::class, 'store'])
+    ->middleware('throttle:10,1');
