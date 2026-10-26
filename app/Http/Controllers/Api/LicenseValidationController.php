@@ -92,7 +92,7 @@ class LicenseValidationController extends Controller
             );
 
             // 2. Módulos por Plan Premium (disponibles para TODOS los rubros con plan premium)
-            if (in_array($license->plan, ['premium', 'pro', 'enterprise'])) {
+            if ($license->plan === License::PLAN_PREMIUM) {
                 array_push(
                     $businessAddons,
                     'current_accounts',
@@ -110,7 +110,7 @@ class LicenseValidationController extends Controller
             // 3. Múltiples listas de precios:
             // - Incluido en plan Premium (cualquier rubro)
             // - Incluido en Ferretería / Corralón (cualquier plan, incluso Básico)
-            if (in_array($license->plan, ['premium', 'pro', 'enterprise']) || $license->business_type === License::BUSINESS_HARDWARE) {
+            if ($license->plan === License::PLAN_PREMIUM || $license->business_type === License::BUSINESS_HARDWARE) {
                 array_push($businessAddons, 'multiple_prices');
             }
 
@@ -126,7 +126,7 @@ class LicenseValidationController extends Controller
             $addons = array_values(array_unique(array_merge($businessAddons, $adminAddons)));
 
             $features = $this->mapFeatures($addons, $license);
-            $normalizedPlan = ($license->plan === 'basico') ? 'basic' : (($license->plan === 'premium') ? 'pro' : $license->plan);
+            $normalizedPlan = ($license->plan === License::PLAN_BASICO) ? 'basic' : (($license->plan === License::PLAN_PREMIUM) ? 'pro' : $license->plan);
             $serverTime = now()->toIso8601String();
             $expiresAt = $license->expiration_date
                 ? \Carbon\Carbon::parse($license->expiration_date)->endOfDay()->toIso8601String()
