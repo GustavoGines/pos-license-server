@@ -59,6 +59,8 @@ class LicenseForm
                     ->label('Fecha de Expiración')
                     ->required(fn (callable $get) => $get('plan_type') === 'saas')
                     ->hidden(fn (callable $get) => $get('plan_type') === 'lifetime')
+                    ->dehydrated(true)
+                    ->dehydrateStateUsing(fn ($state, callable $get) => $get('plan_type') === 'lifetime' ? null : $state)
                     ->nullable(),
 
                 TextInput::make('installation_id')
