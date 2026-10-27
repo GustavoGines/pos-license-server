@@ -70,6 +70,13 @@ return [
     'license_signing_secret' => env('LICENSE_SIGNING_SECRET'),
 
     /*
+    | Semilla privada Ed25519 (64 caracteres hex) con la que el servidor firma
+    | las respuestas de /api/validate (FINDING-LIC-01). Los clientes verifican
+    | con la clave pública embebida en pos-backend. Nunca debe salir de Render.
+    */
+    'license_ed25519_private_key' => env('LICENSE_ED25519_PRIVATE_KEY'),
+
+    /*
     |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------

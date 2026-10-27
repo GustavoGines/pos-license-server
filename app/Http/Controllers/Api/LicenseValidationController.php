@@ -7,6 +7,7 @@ use App\Models\License;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class LicenseValidationController extends Controller
 {
@@ -149,20 +150,26 @@ class LicenseValidationController extends Controller
 
             $payload['signature'] = $this->signValidationPayload($payload, $installationId);
 
+            // FINDING-LIC-01: firma asimétrica Ed25519 (los clientes solo poseen la clave pública).
+            $ed25519Signature = $this->signValidationPayloadEd25519($payload, $installationId);
+            if ($ed25519Signature !== null) {
+                $payload['signature_ed25519'] = $ed25519Signature;
+            }
+
             return response()->json($payload, 200);
         });
     }
 
     /**
-     * Firma criptográficamente el payload de validación para evitar spoofing/replay (L-01, L-17).
+     * Construye la cadena canónica firmada. Debe coincidir byte a byte con
+     * LicenseSyncService::buildCanonicalPayload() en pos-backend.
      */
-    private function signValidationPayload(array $payload, string $installationId): string
+    private function buildCanonicalPayload(array $payload, string $installationId): string
     {
-        $secret = (string) (config('app.license_signing_secret') ?: config('app.key') ?: 'pos-default-signing-key');
         $features = $payload['features'] ?? [];
         ksort($features);
 
-        $canonical = implode('|', [
+        return implode('|', [
             (string) ($payload['status'] ?? ''),
             (string) ($payload['plan'] ?? ''),
             (string) ($payload['plan_type'] ?? ''),
@@ -173,8 +180,48 @@ class LicenseValidationController extends Controller
             (string) ($payload['nonce'] ?? ''),
             json_encode($features, JSON_UNESCAPED_SLASHES),
         ]);
+    }
 
-        return hash_hmac('sha256', $canonical, $secret);
+    /**
+     * Firma criptográficamente el payload de validación para evitar spoofing/replay (L-01, L-17).
+     * HMAC legado: se mantiene solo por retrocompatibilidad con clientes anteriores a FINDING-LIC-01.
+     */
+    private function signValidationPayload(array $payload, string $installationId): string
+    {
+        $secret = (string) (config('app.license_signing_secret') ?: config('app.key') ?: 'pos-default-signing-key');
+
+        return hash_hmac('sha256', $this->buildCanonicalPayload($payload, $installationId), $secret);
+    }
+
+    /**
+     * Firma Ed25519 (hex, 128 caracteres) con la semilla privada LICENSE_ED25519_PRIVATE_KEY.
+     * Retorna null (y registra un error) si la clave no está configurada o es inválida.
+     */
+    private function signValidationPayloadEd25519(array $payload, string $installationId): ?string
+    {
+        $seedHex = trim((string) config('app.license_ed25519_private_key', ''));
+        if ($seedHex === '') {
+            Log::error('LICENSE_ED25519_PRIVATE_KEY no configurada: los clientes rechazarán las respuestas de /api/validate.');
+
+            return null;
+        }
+
+        $seed = ctype_xdigit($seedHex) ? hex2bin($seedHex) : false;
+        if ($seed === false || strlen($seed) !== SODIUM_CRYPTO_SIGN_SEEDBYTES) {
+            Log::error('LICENSE_ED25519_PRIVATE_KEY inválida: se esperan 64 caracteres hexadecimales.');
+
+            return null;
+        }
+
+        $keyPair = sodium_crypto_sign_seed_keypair($seed);
+        $secretKey = sodium_crypto_sign_secretkey($keyPair);
+        $signature = sodium_crypto_sign_detached($this->buildCanonicalPayload($payload, $installationId), $secretKey);
+
+        sodium_memzero($seed);
+        sodium_memzero($secretKey);
+        sodium_memzero($keyPair);
+
+        return bin2hex($signature);
     }
 
     /**
