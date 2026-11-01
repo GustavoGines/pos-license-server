@@ -102,7 +102,7 @@ class LicensesTable
                         'current_accounts'  => '📘 Cuentas Corrientes',
                         'multiple_prices'   => '🏷️ Listas de Precios',
                         'multi_caja'        => '🖥️ Múltiples Cajas',
-                        'mobile_app'        => '📱 App Móvil',
+                        'mobile_app'        => '📱 Caja4U Móvil',
                         'remote_access'     => '🌐 Acceso Remoto',
                         'advanced_reports'  => '📊 Reportes Gerenciales',
                         'predictive_alerts' => '🧠 Alertas Predictivas',
