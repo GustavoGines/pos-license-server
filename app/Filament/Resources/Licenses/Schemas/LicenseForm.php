@@ -80,7 +80,7 @@ class LicenseForm
                         'current_accounts'  => '📘 Cuentas Corrientes (Fiado)',
                         'multiple_prices'   => '🏷️ Listas de Precios (Mayorista/Tarjeta)',
                         'multi_caja'        => '🖥️ Múltiples Cajas / Terminales',
-                        'mobile_app'        => '📱 App Móvil (Inventario y Ventas)',
+                        'mobile_app'        => '📱 Caja4U Móvil (Inventario y Ventas)',
                         'remote_access'     => '🌐 Acceso Remoto (Cloudflare / Internet)',
                         'advanced_reports'  => '📊 Reportes Gerenciales (Balances, Excel, PDF)',
                         'predictive_alerts' => '🧠 Inteligencia Logística (Alertas Predictivas)',
